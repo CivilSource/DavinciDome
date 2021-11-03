@@ -1,19 +1,14 @@
-html{
-
-  background-color: beige;
-  min-height: 100vh;
-
+html {
+    background-color: beige;
+    min-height: 100vh;
 }
 
-
-
-
-
 .App {
+    text-align: center;
+    background-color: olivedrab;
+    min-height: 90vh;
+}
 
-  text-align: center;
-  background-color: olivedrab;
-  min-height: 50vh;
-
-
+.Canvas {
+    min-height: 100vh;
 }
