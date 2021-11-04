@@ -72,13 +72,13 @@ export class Scaffold {
             }
         });
         PENTA.forEach(penta => {
-            for (let walk = 0; walk < penta.length; walk++) {
-                const next = (walk + 1) % penta.length;
-                const walkBead = penta[walk][1] === 1 ? 0 : this.frequency - 2;
-                const nextBead = penta[next][1] === 1 ? 0 : this.frequency - 2;
-                const currentVertex = edgePoints[penta[walk][0]][walkBead];
-                const nextVertex = edgePoints[penta[next][0]][nextBead];
-                adjacent(currentVertex, nextVertex);
+            for (let a = 0; a < penta.length; a++) {
+                const b = (a + 1) % penta.length;
+                const edgePointA = penta[a][1] === 1 ? 0 : this.frequency - 2;
+                const edgePointB = penta[b][1] === 1 ? 0 : this.frequency - 2;
+                const vertexA = edgePoints[penta[a][0]][edgePointA];
+                const vertexB = edgePoints[penta[b][0]][edgePointB];
+                adjacent(vertexA, vertexB);
             }
         });
         return edgePoints;
