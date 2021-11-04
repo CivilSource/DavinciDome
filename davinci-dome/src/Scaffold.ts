@@ -219,12 +219,17 @@ function sortVertex(vertex: Vertex) {
         throw new Error("No first to pop!");
     }
     const sorted: Vertex[] = [first];
-
     const vectorTo = ({location}: Vertex) => new Vector3().subVectors(location, vertex.location).normalize();
     while (vertex.adjacent.length > 0) {
         const top: Vertex = sorted[sorted.length - 1];
-        const nearby = vertex.adjacent.filter(adj => vectorTo(adj).dot(vectorTo(top)) > 0.25);
-        const next = nearby.find(adj => new Vector3().crossVectors(vectorTo(top), vectorTo(adj)).dot(outward) > 0);
+        const next = vertex.adjacent.find(adjacent => {
+            const toAdjacent = vectorTo(adjacent);
+            const toTop = vectorTo(top);
+            if (toAdjacent.dot(toTop) < 0.25) {
+                return false;
+            }
+            return new Vector3().crossVectors(toTop, toAdjacent).dot(outward) > 0;
+        });
         if (!next) {
             throw new Error("No next found");
         }
