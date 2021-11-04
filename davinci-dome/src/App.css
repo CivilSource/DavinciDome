@@ -1,11 +1,10 @@
 html {
-    background-color: beige;
+    background-color: black;
     min-height: 100vh;
 }
 
 .App {
     text-align: center;
-    background-color: olivedrab;
     min-height: 90vh;
 }
 

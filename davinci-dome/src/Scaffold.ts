@@ -1,6 +1,7 @@
 import {Vector3} from 'three';
 
 export interface Vertex {
+    index: number,
     location: Vector3;
     adjacent: Vertex[];
 }
@@ -13,7 +14,7 @@ function adjacent(v0: Vertex, v1: Vertex): void {
 export class Scaffold {
     public readonly vertices: Vertex[] = [];
 
-    constructor(public readonly frequency: number) {
+    constructor(public readonly frequency: number, public readonly radius: number) {
         VERTEX.forEach(location => this.vertexAt(location));
         if (frequency === 1) {
             EDGE.forEach(edge => {
@@ -39,9 +40,9 @@ export class Scaffold {
                 adjacent(side2, side0);
             });
         } else {
-            const many = this.buildEdges();
-            this.buildFaces(many);
+            this.buildFaces(this.buildEdges());
         }
+        this.vertices.forEach(sortVertex);
     }
 
     private buildEdges(): Vertex[][] {
@@ -151,7 +152,10 @@ export class Scaffold {
     }
 
     private vertexAt(location: Vector3): Vertex {
-        const vertex = {location, adjacent: []};
+        const length = location.length();
+        location.multiplyScalar(this.radius / length);
+        const index = this.vertices.length;
+        const vertex = {index, location, adjacent: []};
         this.vertices.push(vertex);
         return vertex;
     }
@@ -207,3 +211,25 @@ const PENTA = [
     [[28, -1], [20, -1], [29, -1], [5, -1], [24, -1]],
     [[6, -1], [10, -1], [18, -1], [13, -1], [25, -1]],
 ];
+
+function sortVertex(vertex: Vertex) {
+    const outward = new Vector3().copy(vertex.location).normalize();
+    const first = vertex.adjacent.pop();
+    if (!first) {
+        throw new Error("No first to pop!");
+    }
+    const sorted: Vertex[] = [first];
+
+    const vectorTo = ({location}: Vertex) => new Vector3().subVectors(location, vertex.location).normalize();
+    while (vertex.adjacent.length > 0) {
+        const top: Vertex = sorted[sorted.length - 1];
+        const nearby = vertex.adjacent.filter(adj => vectorTo(adj).dot(vectorTo(top)) > 0.25);
+        const next = nearby.find(adj => new Vector3().crossVectors(vectorTo(top), vectorTo(adj)).dot(outward) > 0);
+        if (!next) {
+            throw new Error("No next found");
+        }
+        sorted.push(next);
+        vertex.adjacent = vertex.adjacent.filter(adj => adj.index !== next.index);
+    }
+    vertex.adjacent = sorted
+}
