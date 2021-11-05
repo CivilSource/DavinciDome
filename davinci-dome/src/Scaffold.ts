@@ -31,36 +31,36 @@ export class Scaffold {
                 adjacent(midEdge, v1);
                 return midEdge;
             });
-            FACE_EDGE.forEach(faceEdge => {
-                const side0 = midVertices[Math.abs(faceEdge[0])];
-                const side1 = midVertices[Math.abs(faceEdge[1])];
-                const side2 = midVertices[Math.abs(faceEdge[2])];
+            FACE_EDGES.forEach(faceEdge => {
+                const side0 = midVertices[faceEdge[0]];
+                const side1 = midVertices[faceEdge[1]];
+                const side2 = midVertices[faceEdge[2]];
                 adjacent(side0, side1);
                 adjacent(side1, side2);
                 adjacent(side2, side0);
             });
         } else {
-            this.buildFaces(this.buildEdges());
+            this.buildFaces(this.buildEdgeVertices());
         }
         this.vertices.forEach(sortVertex);
     }
 
-    private buildEdges(): Vertex[][] {
-        const edgePoints: Vertex[][] = [];
-        EDGE.forEach(edge => {
-            const edgeVertexRows: Vertex[] = [];
-            edgePoints.push(edgeVertexRows);
+    private buildEdgeVertices(): Vertex[][] {
+        const edgeVertices: Vertex[][] = [];
+        EDGE.forEach(edgeVertexIndex => {
+            const verticesOfEdge: Vertex[] = [];
+            edgeVertices.push(verticesOfEdge);
             let vertex: Vertex | undefined = undefined;
             let previousVertex: Vertex | undefined = undefined;
             for (let walk = 0; walk < this.frequency - 1; walk++) {
                 previousVertex = vertex;
-                const v0 = this.vertices[edge[0]];
-                const v1 = this.vertices[edge[1]];
+                const v0 = this.vertices[edgeVertexIndex[0]];
+                const v1 = this.vertices[edgeVertexIndex[1]];
                 const loc0 = v0.location;
                 const loc1 = v1.location;
                 const spot = new Vector3().lerpVectors(loc0, loc1, (walk + 1) / this.frequency);
                 vertex = this.vertexAt(spot);
-                edgeVertexRows.push(vertex);
+                verticesOfEdge.push(vertex);
                 if (previousVertex) {
                     adjacent(vertex, previousVertex);
                     if (walk === this.frequency - 2) {
@@ -71,79 +71,74 @@ export class Scaffold {
                 }
             }
         });
-        PENTA.forEach(penta => {
-            for (let a = 0; a < penta.length; a++) {
-                const b = (a + 1) % penta.length;
-                const edgePointA = penta[a][1] === 1 ? 0 : this.frequency - 2;
-                const edgePointB = penta[b][1] === 1 ? 0 : this.frequency - 2;
-                const vertexA = edgePoints[penta[a][0]][edgePointA];
-                const vertexB = edgePoints[penta[b][0]][edgePointB];
-                adjacent(vertexA, vertexB);
-            }
-        });
-        return edgePoints;
+        return edgeVertices;
     }
 
-    private buildFaces(vertices: Vertex[][]): void {
-        const v: Vertex[][] = [];
-        for (let walk = 0; walk < this.frequency - 2; walk++) {
-            v.push([]);
-        }
-        const vectorA = new Vector3();
-        const vectorB = new Vector3();
-        for (let walkF = 0; walkF < FACE.length; walkF++) {
-            const v0 = this.vertices[FACE[walkF][0]];
+    private buildFaces(edgeVertices: Vertex[][]): void {
+        const faceVertexArrays: Vertex[][] = [];
+        FACE_VERTICES.forEach((faceVertexIndex, faceIndex) => {
+            const faceVertex = (which: number) => this.vertices[faceVertexIndex[which]];
+            const v0 = faceVertex(0);
             const origin = v0.location;
+            // interpolate along the edges of the face creating arrays of vertices on the way
             for (let walkA = 1; walkA < this.frequency - 1; walkA++) {
-                const v1 = this.vertices[FACE[walkF][1]];
-                vectorA.lerpVectors(origin, v1.location, walkA / this.frequency);
+                const v1 = faceVertex(1);
+                const vectorA = new Vector3().lerpVectors(origin, v1.location, walkA / this.frequency);
                 vectorA.sub(origin);
-                v[walkA - 1] = [];
+                faceVertexArrays[walkA - 1] = [];
                 for (let walkB = 1; walkB < this.frequency - walkA; walkB++) {
-                    const v2 = this.vertices[FACE[walkF][2]];
-                    vectorB.lerpVectors(origin, v2.location, walkB / this.frequency);
+                    const v2 = faceVertex(2);
+                    const vectorB = new Vector3().lerpVectors(origin, v2.location, walkB / this.frequency);
                     vectorB.sub(origin);
                     const spot = new Vector3().copy(origin);
                     spot.add(vectorA);
                     spot.add(vectorB);
-                    v[walkA - 1].push(this.vertexAt(spot));
+                    faceVertexArrays[walkA - 1].push(this.vertexAt(spot));
                 }
             }
-            for (let walkRow = 0; walkRow < v.length; walkRow++) {
-                for (let walk = 0; walk < v[walkRow].length; walk++) {
-                    if (walk < v[walkRow].length - 1) {
-                        adjacent(v[walkRow][walk], v[walkRow][walk + 1]);
+            // define the adjacency among face vertices
+            for (let row = 0; row < faceVertexArrays.length; row++) {
+                for (let rowMember = 0; rowMember < faceVertexArrays[row].length; rowMember++) {
+                    if (rowMember < faceVertexArrays[row].length - 1) {
+                        adjacent(faceVertexArrays[row][rowMember], faceVertexArrays[row][rowMember + 1]);
                     }
-                    if (walkRow > 0) {
-                        const vert = v[walkRow][walk];
-                        adjacent(vert, v[walkRow - 1][walk]);
-                        adjacent(vert, v[walkRow - 1][walk + 1]);
+                    if (row > 0) {
+                        const vert = faceVertexArrays[row][rowMember];
+                        adjacent(vert, faceVertexArrays[row - 1][rowMember]);
+                        adjacent(vert, faceVertexArrays[row - 1][rowMember + 1]);
                     }
                 }
             }
-            const vv0: Vertex[] = [];
-            const vv1: Vertex[] = [];
-            const vv2: Vertex[] = [];
+            // compile side vertices (of a triangle!) reversing traversal when necessary
+            const sideVertices: Vertex[] [] = [[], [], []];
             for (let walk = 0; walk < this.frequency - 2; walk++) {
-                const antiWalk = v.length - walk - 1;
-                vv0.push(v[FACE_EDGE[walkF][0] >= 0 ? walk : antiWalk][0]);
-                const ee = v[(FACE_EDGE[walkF][1] < 0) ? walk : antiWalk];
-                vv1.push(ee[ee.length - 1]);
-                vv2.push(v[0][(FACE_EDGE[walkF][2] < 0) ? walk : antiWalk]);
+                const antiWalk = faceVertexArrays.length - walk - 1;
+                sideVertices[0].push(faceVertexArrays[walk][0]);
+                sideVertices[1].push(faceVertexArrays[antiWalk][faceVertexArrays[antiWalk].length - 1]);
+                sideVertices[2].push(faceVertexArrays[0][walk]);
             }
-            const vs: Vertex[] [] = [];
-            vs.push(vv0);
-            vs.push(vv1);
-            vs.push(vv2);
-            for (let walkSide = 0; walkSide < vs.length; walkSide++) {
-                const edge = vertices[Math.abs(FACE_EDGE[walkF][walkSide])];
-                for (let walk = 0; walk < v.length; walk++) {
-                    const vsVertex = vs[walkSide][walk];
+            // define adjacency between face vertices and edge vertices
+            for (let walkSide = 0; walkSide < sideVertices.length; walkSide++) {
+                const faceEdges = FACE_EDGES[faceIndex];
+                const edge = edgeVertices[faceEdges[walkSide]];
+                for (let walk = 0; walk < faceVertexArrays.length; walk++) {
+                    const vsVertex = sideVertices[walkSide][walk];
                     adjacent(vsVertex, edge[walk]);
                     adjacent(vsVertex, edge[walk + 1]);
                 }
             }
-        }
+        });
+        PENTAGON_VERTICES.forEach(vertexArray => {
+            // define the adjacency for this pentagon
+            for (let current = 0; current < vertexArray.length; current++) {
+                const next = (current + 1) % vertexArray.length;
+                const edgeVertexA = vertexArray[current].front ? 0 : this.frequency - 2;
+                const edgeVertexB = vertexArray[next].front ? 0 : this.frequency - 2;
+                const vertexA = edgeVertices[vertexArray[current].edge][edgeVertexA];
+                const vertexB = edgeVertices[vertexArray[next].edge][edgeVertexB];
+                adjacent(vertexA, vertexB);
+            }
+        });
     }
 
     private vertexBetween(v0: Vertex, v1: Vertex): Vertex {
@@ -183,35 +178,53 @@ const EDGE = [
     [6, 11], [6, 8], [7, 8], [8, 10], [9, 10],
 ];
 
-const FACE = [
+const FACE_VERTICES = [
     [0, 2, 4], [0, 2, 9], [0, 4, 7], [0, 5, 7], [0, 5, 9],
     [1, 2, 11], [1, 2, 9], [1, 6, 10], [1, 6, 11], [1, 9, 10],
     [2, 4, 11], [3, 4, 11], [3, 4, 7], [3, 6, 11], [3, 6, 8],
     [3, 7, 8], [5, 7, 8], [5, 8, 10], [5, 9, 10], [6, 8, 10],
 ];
 
-const FACE_EDGE = [
-    [0, 11, -1], [0, 12, -4], [1, 19, -3], [2, 21, -3], [2, 23, -4],
-    [7, 10, -6], [7, 12, -9], [8, 24, -5], [8, 25, -6], [9, 29, -5],
-    [11, 18, -10], [14, 18, -13], [14, 19, -16], [15, 25, -13], [15, 26, -17],
-    [16, 27, -17], [21, 27, -22], [22, 28, -20], [23, 29, -20], [26, 28, -24],
+const FACE_EDGES = [
+    [0, 11, 1], [0, 12, 4], [1, 19, 3], [2, 21, 3], [2, 23, 4],
+    [7, 10, 6], [7, 12, 9], [8, 24, 5], [8, 25, 6], [9, 29, 5],
+    [11, 18, 10], [14, 18, 13], [14, 19, 16], [15, 25, 13], [15, 26, 17],
+    [16, 27, 17], [21, 27, 22], [22, 28, 20], [23, 29, 20], [26, 28, 24],
 ];
 
-const PENTA = [
-    [[0, 1], [1, 1], [3, 1], [2, 1], [4, 1]],
-    [[7, 1], [6, 1], [8, 1], [5, 1], [9, 1]],
-    [[10, 1], [11, 1], [0, -1], [12, 1], [7, -1]],
-    [[14, 1], [13, 1], [15, 1], [17, 1], [16, 1]],
-    [[18, 1], [11, -1], [1, -1], [19, 1], [14, -1]],
-    [[21, 1], [22, 1], [20, 1], [23, 1], [2, -1]],
-    [[26, 1], [24, 1], [8, -1], [25, 1], [15, -1]],
-    [[27, 1], [16, -1], [19, -1], [3, -1], [21, -1]],
-    [[28, 1], [22, -1], [27, -1], [17, -1], [26, -1]],
-    [[4, -1], [23, -1], [29, 1], [9, -1], [12, -1]],
-    [[28, -1], [20, -1], [29, -1], [5, -1], [24, -1]],
-    [[6, -1], [10, -1], [18, -1], [13, -1], [25, -1]],
+interface PentagonVertex {
+    edge: number;
+    front: boolean;
+}
+
+const PENTAGON_VERTICES: PentagonVertex[][] = [
+    [{edge: 0, front: true}, {edge: 1, front: true},
+        {edge: 3, front: true}, {edge: 2, front: true}, {edge: 4, front: true}],
+    [{edge: 7, front: true}, {edge: 6, front: true},
+        {edge: 8, front: true}, {edge: 5, front: true}, {edge: 9, front: true}],
+    [{edge: 10, front: true}, {edge: 11, front: true},
+        {edge: 0, front: false}, {edge: 12, front: true}, {edge: 7, front: false}],
+    [{edge: 14, front: true}, {edge: 13, front: true},
+        {edge: 15, front: true}, {edge: 17, front: true}, {edge: 16, front: true}],
+    [{edge: 18, front: true}, {edge: 11, front: false},
+        {edge: 1, front: false}, {edge: 19, front: true}, {edge: 14, front: false}],
+    [{edge: 21, front: true}, {edge: 22, front: true},
+        {edge: 20, front: true}, {edge: 23, front: true}, {edge: 2, front: false}],
+    [{edge: 26, front: true}, {edge: 24, front: true},
+        {edge: 8, front: false}, {edge: 25, front: true}, {edge: 15, front: false}],
+    [{edge: 27, front: true}, {edge: 16, front: false},
+        {edge: 19, front: false}, {edge: 3, front: false}, {edge: 21, front: false}],
+    [{edge: 28, front: true}, {edge: 22, front: false},
+        {edge: 27, front: false}, {edge: 17, front: false}, {edge: 26, front: false}],
+    [{edge: 4, front: false}, {edge: 23, front: false},
+        {edge: 29, front: true}, {edge: 9, front: false}, {edge: 12, front: false}],
+    [{edge: 28, front: false}, {edge: 20, front: false},
+        {edge: 29, front: false}, {edge: 5, front: false}, {edge: 24, front: false}],
+    [{edge: 6, front: false}, {edge: 10, front: false},
+        {edge: 18, front: false}, {edge: 13, front: false}, {edge: 25, front: false}],
 ];
 
+// sort the adjacent vertices of a vertex in a clockwise way
 function sortVertex(vertex: Vertex) {
     const outward = new Vector3().copy(vertex.location).normalize();
     const first = vertex.adjacent.pop();
@@ -236,5 +249,5 @@ function sortVertex(vertex: Vertex) {
         sorted.push(next);
         vertex.adjacent = vertex.adjacent.filter(adj => adj.index !== next.index);
     }
-    vertex.adjacent = sorted
+    vertex.adjacent = sorted;
 }
