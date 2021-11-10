@@ -65,7 +65,7 @@ function App() {
                     return <Ball key={`vertex-${index}`} position={location}/>;
                 })}
                 {intervals.map(interval => {
-                    return <IntervalLine interval={interval}/>
+                    return <IntervalLine key={`interval-${interval.index.toFixed()}`} interval={interval}/>;
                 })}
                 <PerspectiveCamera makeDefault={true} position={[20, 1, 2]}/>
                 <OrbitControls/>
