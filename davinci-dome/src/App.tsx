@@ -46,14 +46,15 @@ function IntervalLine({interval}: { interval: Interval }) {
                     onUpdate={self => self.needsUpdate = true}
                 />
             </bufferGeometry>
-            <lineBasicMaterial attach="material" color="purple"/>
+            <lineBasicMaterial attach="material" color="white"/>
         </line>
     );
 }
 
 function App() {
-    const scaffold = new Scaffold(5, 7);
-    const intervals = davinci(scaffold)
+    const scaffold = new Scaffold(2, 7);
+    const angle = Math.PI * 10 / 180
+    const intervals = davinci(scaffold, angle)
     return (
         <div className="App">
             <Canvas className="Canvas">
