@@ -1,16 +1,16 @@
-import {Line3, Plane, Vector3} from "three";
-import {Scaffold, Vertex} from "./Scaffold";
+import {Line3, Plane, Vector3} from "three"
+import {Scaffold, Vertex} from "./Scaffold"
 
 export interface Interval {
-    index: Number
-    pointA: Vector3
-    pointB: Vector3
-    vertexA: Vertex
-    vertexB: Vertex
+    index: Number;
+    pointA: Vector3;
+    pointB: Vector3;
+    vertexA: Vertex;
+    vertexB: Vertex;
 }
 
 export interface Hub {
-    adjacentIntervals: Interval[]
+    adjacentIntervals: Interval[];
 }
 
 function intervalName(vertexA: Vertex, vertexB: Vertex) {
@@ -36,14 +36,14 @@ export function davinci(scaffold: Scaffold, angle: number) {
             intervals.push(interval)
             dictionary[intervalName(interval.vertexA, interval.vertexB)] = interval
         })
-    });
+    })
     const hubs = scaffold.vertices.map(vertex => {
         const adjacentIntervals = vertex.adjacent.map(adjacentVertex => {
             return dictionary[intervalName(vertex, adjacentVertex)]
         })
         const hub: Hub = {adjacentIntervals}
         return hub
-    });
+    })
     intervals.forEach(({pointA, pointB}) => {
         const axis = new Vector3().lerpVectors(pointA, pointB, 0.5).normalize()
         pointA.applyAxisAngle(axis, angle)
@@ -58,12 +58,14 @@ export function davinci(scaffold: Scaffold, angle: number) {
         if (adjacentIndex < 0) {
             throw new Error("adjacent not found")
         }
-
-        const nextLine = new Line3(lineInterval.pointA, lineInterval.pointB)
-        const intersectionPoint = plane.intersectLine(nextLine, new Vector3())
-        if (!intersectionPoint) {
-            throw new Error("intersection not found")
-        }
+        const extend = (start: Vector3, end: Vector3) =>
+            new Vector3().copy(end).add(new Vector3().subVectors(end, start))
+        const nextLine = new Line3(
+            extend(lineInterval.pointA, lineInterval.pointB),
+            extend(lineInterval.pointB, lineInterval.pointA)
+        )
+        const intersectionPoint = new Vector3()
+        plane.intersectLine(nextLine, intersectionPoint)
         const distA = intersectionPoint.distanceTo(lineInterval.pointA)
         const distB = intersectionPoint.distanceTo(lineInterval.pointB)
         if (distA < distB) {
@@ -77,7 +79,7 @@ export function davinci(scaffold: Scaffold, angle: number) {
         hub.adjacentIntervals.forEach((currentInterval, index) => {
             const nextIndex = (index + 1) % hub.adjacentIntervals.length
             const nextInterval = hub.adjacentIntervals[nextIndex]
-            intersect(currentInterval, nextInterval)
+            intersect(nextInterval, currentInterval)
         })
     })
 
