@@ -4,6 +4,8 @@ import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Vector3} from 'three'
 import {Scaffold} from './Scaffold'
 import {davinci, Interval} from "./Davinci"
+import {Button} from "reactstrap";
+import {useEffect, useState} from "react";
 
 interface Somewhere {
     position: Vector3;
@@ -51,12 +53,32 @@ function IntervalLine({interval}: { interval: Interval }) {
     )
 }
 
+const FREQUENCIES = [1, 2, 3, 4, 5,10,15,20]
+const ANGLE = Math.PI * -10 / 180
+const RADIUS = 7
+
 function App() {
-    const scaffold = new Scaffold(2, 7)
-    const angle = Math.PI * -10 / 180
-    const intervals = davinci(scaffold, angle)
+    const [frequency, setFrequency] = useState(2)
+    const [scaffold, setScaffold] = useState(new Scaffold(frequency, RADIUS))
+    const [intervals, setIntervals] = useState(davinci(scaffold, ANGLE))
+    useEffect(() => {
+        console.log(`frequency is ${frequency}`)
+        const freshScaffold = new Scaffold(frequency, RADIUS);
+        setScaffold(freshScaffold)
+        setIntervals(davinci(freshScaffold, ANGLE))
+    }, [frequency])
+
     return (
         <div className="App">
+            <div className="top-left">
+                {FREQUENCIES.map(f => {
+                    return (
+                        <Button onClick={() => setFrequency(f)}>
+                            {f}
+                        </Button>
+                    )
+                })}
+            </div>
             <Canvas className="Canvas">
                 <ambientLight/>
                 <pointLight position={[10, 10, 10]}/>

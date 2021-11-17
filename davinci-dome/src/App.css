@@ -11,3 +11,10 @@ html {
 .Canvas {
     min-height: 100vh;
 }
+
+.top-left {
+    position: absolute;
+    top: 0.5em;
+    left: 1em;
+    z-index: 100;
+}
