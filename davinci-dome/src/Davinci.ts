@@ -1,5 +1,5 @@
 import {Line3, Plane, Vector3} from "three"
-import {Scaffold, Vertex} from "./Scaffold"
+import {Chirality, Scaffold, Vertex} from "./Scaffold"
 
 export interface Interval {
     index: Number;
@@ -20,6 +20,7 @@ function intervalName(vertexA: Vertex, vertexB: Vertex) {
 }
 
 export function davinci(scaffold: Scaffold, angle: number) {
+    const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
     const intervals: Interval[] = []
     const dictionary: Record<string, Interval> = {}
     scaffold.vertices.forEach(vertex => {
@@ -46,8 +47,8 @@ export function davinci(scaffold: Scaffold, angle: number) {
     })
     intervals.forEach(({pointA, pointB}) => {
         const axis = new Vector3().lerpVectors(pointA, pointB, 0.5).normalize()
-        pointA.applyAxisAngle(axis, angle)
-        pointB.applyAxisAngle(axis, angle)
+        pointA.applyAxisAngle(axis, twist)
+        pointB.applyAxisAngle(axis, twist)
     })
 
     function intersect(planeInterval: Interval, lineInterval: Interval) {
@@ -79,9 +80,17 @@ export function davinci(scaffold: Scaffold, angle: number) {
         hub.adjacentIntervals.forEach((currentInterval, index) => {
             const nextIndex = (index + 1) % hub.adjacentIntervals.length
             const nextInterval = hub.adjacentIntervals[nextIndex]
-            intersect(nextInterval, currentInterval)
+            intersect(currentInterval, nextInterval)
         })
     })
 
     return intervals
+}
+
+export function radiansToDegrees(radian: number) {
+    return 180 / (radian * Math.PI)
+}
+
+export function degreesToRadians(degree: number) {
+    return Math.PI * degree / 180
 }

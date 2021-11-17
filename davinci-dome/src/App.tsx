@@ -1,11 +1,12 @@
 import './App.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import {Canvas} from "@react-three/fiber"
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Vector3} from 'three'
-import {Scaffold} from './Scaffold'
-import {davinci, Interval} from "./Davinci"
-import {Button} from "reactstrap";
-import {useEffect, useState} from "react";
+import {Chirality, Scaffold} from './Scaffold'
+import {davinci, degreesToRadians, Interval} from "./Davinci"
+import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
+import {useEffect, useState} from "react"
 
 interface Somewhere {
     position: Vector3;
@@ -53,31 +54,69 @@ function IntervalLine({interval}: { interval: Interval }) {
     )
 }
 
-const FREQUENCIES = [1, 2, 3, 4, 5,10,15,20]
-const ANGLE = Math.PI * -10 / 180
+const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15, 20]
+const DEGREES = 10
 const RADIUS = 7
+const CHIRALITY = Chirality.Left
 
 function App() {
+    const [chirality, setChirality] = useState(CHIRALITY)
     const [frequency, setFrequency] = useState(2)
-    const [scaffold, setScaffold] = useState(new Scaffold(frequency, RADIUS))
-    const [intervals, setIntervals] = useState(davinci(scaffold, ANGLE))
+    const [degrees, setDegrees] = useState(DEGREES)
+    const [radians, setRadians] = useState(degreesToRadians(DEGREES))
+    const [scaffold, setScaffold] = useState(new Scaffold(frequency, RADIUS, CHIRALITY))
+    const [intervals, setIntervals] = useState(davinci(scaffold, radians))
     useEffect(() => {
         console.log(`frequency is ${frequency}`)
-        const freshScaffold = new Scaffold(frequency, RADIUS);
-        setScaffold(freshScaffold)
-        setIntervals(davinci(freshScaffold, ANGLE))
-    }, [frequency])
-
+        setScaffold(new Scaffold(frequency, RADIUS, chirality))
+    }, [frequency, chirality])
+    useEffect(() => {
+        console.log(`angle is ${radians}`)
+        setIntervals(davinci(scaffold, radians))
+    }, [radians, scaffold])
     return (
         <div className="App">
             <div className="top-left">
-                {FREQUENCIES.map(f => {
-                    return (
-                        <Button onClick={() => setFrequency(f)}>
-                            {f}
-                        </Button>
-                    )
-                })}
+                <ButtonGroup>
+                    {FREQUENCIES.map(f => {
+                        return (
+                            <Button color={f === frequency ? "success" : "secondary"} onClick={() => setFrequency(f)}>
+                                {f}
+                            </Button>
+                        )
+                    })}
+                </ButtonGroup>
+                <br/>
+                <InputGroup>
+                    <InputGroupText>
+                        Degrees
+                    </InputGroupText>
+                    <Input
+                        value={degrees}
+                        onChange={event => {
+                            const v = event.target.value
+                            console.log(`v is ${v}`)
+                            setDegrees(parseInt(v))
+                        }}
+                    />
+                    <Button onClick={() => {
+                        setRadians(degreesToRadians(degrees))
+                    }}>
+                        go!
+                    </Button>
+                </InputGroup>
+
+                <br/>
+                <ButtonGroup>
+                    <Button color={chirality === Chirality.Left ? "success" : "secondary"}
+                            onClick={() => setChirality(Chirality.Left)}>
+                        Left
+                    </Button>
+                    <Button color={chirality === Chirality.Right ? "success" : "secondary"}
+                            onClick={() => setChirality(Chirality.Right)}>
+                        Right
+                    </Button>
+                </ButtonGroup>
             </div>
             <Canvas className="Canvas">
                 <ambientLight/>

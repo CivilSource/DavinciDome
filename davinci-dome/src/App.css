@@ -4,11 +4,11 @@ html {
 }
 
 .App {
-    text-align: center;
     min-height: 90vh;
 }
 
 .Canvas {
+    background-color: black;
     min-height: 100vh;
 }
 
