@@ -30,27 +30,29 @@ function Ball({position}: Somewhere) {
     )
 }
 
-function IntervalLine({interval}: { interval: Interval }) {
+function IntervalLines({intervals}: { intervals: Interval[] }) {
+    const array = new Float32Array(intervals.length * 6)
+    let index = 0
+    intervals.forEach(({pointA, pointB}) => {
+        array[index++] = pointA.x
+        array[index++] = pointA.y
+        array[index++] = pointA.z
+        array[index++] = pointB.x
+        array[index++] = pointB.y
+        array[index++] = pointB.z
+    })
     return (
-        <line>
+        <lineSegments>
             <bufferGeometry attach="geometry">
                 <bufferAttribute
                     attachObject={["attributes", "position"]}
-                    array={new Float32Array([
-                        interval.pointA.x,
-                        interval.pointA.y,
-                        interval.pointA.z,
-                        interval.pointB.x,
-                        interval.pointB.y,
-                        interval.pointB.z,
-                    ])}
-                    count={2}
+                    array={array}
+                    count={intervals.length * 2}
                     itemSize={3}
-                    onUpdate={self => self.needsUpdate = true}
                 />
             </bufferGeometry>
             <lineBasicMaterial attach="material" color="white"/>
-        </line>
+        </lineSegments>
     )
 }
 
@@ -125,9 +127,7 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${index}`} position={location}/>
                 })}
-                {intervals.map(interval => {
-                    return <IntervalLine key={`interval-${interval.index.toFixed()}`} interval={interval}/>
-                })}
+                <IntervalLines intervals={intervals}/>
                 <PerspectiveCamera makeDefault={true} position={[20, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
