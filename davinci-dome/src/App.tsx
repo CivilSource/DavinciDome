@@ -74,21 +74,19 @@ function App() {
     const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, CHIRALITY))
     const [intervals, setIntervals] = useState(davinci(scaffold, radians))
     useEffect(() => {
-        console.log(`frequency is ${frequency}`)
-        setScaffold(new Scaffold(frequency, radius, chirality))
+        const freshScaffold = new Scaffold(frequency, radius, chirality)
+        setScaffold(freshScaffold)
+        setIntervals(davinci(freshScaffold, radians))
         setBallRadius(radius / 100)
-    }, [frequency, radius, chirality])
-    useEffect(() => {
-        console.log(`angle is ${radians}`)
-        setIntervals(davinci(scaffold, radians))
-    }, [radians, scaffold])
+    }, [frequency, radians, radius, chirality])
     return (
         <div className="App">
             <div className="top-left">
                 <ButtonGroup>
                     {FREQUENCIES.map(f => {
                         return (
-                            <Button color={f === frequency ? "success" : "secondary"} onClick={() => setFrequency(f)}>
+                            <Button key={`frequency-${f}`} color={f === frequency ? "success" : "secondary"}
+                                    onClick={() => setFrequency(f)}>
                                 {f}
                             </Button>
                         )
@@ -144,7 +142,8 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${radius}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <IntervalLines key={`intervals-${chirality}-${radians}-${intervals.length}`} intervals={intervals}/>
+                <IntervalLines key={`intervals-${chirality}-${radius}-${radians}-${intervals.length}`}
+                               intervals={intervals}/>
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
