@@ -144,7 +144,7 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${radius}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <IntervalLines key={`intervals-${intervals.length}`} intervals={intervals}/>
+                <IntervalLines key={`intervals-${chirality}-${radians}-${intervals.length}`} intervals={intervals}/>
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
