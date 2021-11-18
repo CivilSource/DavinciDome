@@ -73,11 +73,13 @@ function App() {
     const [radians, setRadians] = useState(degreesToRadians(DEGREES))
     const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, CHIRALITY))
     const [intervals, setIntervals] = useState(davinci(scaffold, radians))
+    const [version, setVersion] = useState(0)
     useEffect(() => {
         const freshScaffold = new Scaffold(frequency, radius, chirality)
         setScaffold(freshScaffold)
         setIntervals(davinci(freshScaffold, radians))
         setBallRadius(radius / 100)
+        setVersion(version => version + 1)
     }, [frequency, radians, radius, chirality])
     return (
         <div className="App">
@@ -140,10 +142,9 @@ function App() {
                 <pointLight position={[10, 10, 10]}/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${radius}-${index}`} position={location} radius={ballRadius}/>
+                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <IntervalLines key={`intervals-${chirality}-${radius}-${radians}-${intervals.length}`}
-                               intervals={intervals}/>
+                <IntervalLines key={`intervals-${version}`} intervals={intervals}/>
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
