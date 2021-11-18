@@ -50,7 +50,6 @@ function IntervalLines({intervals}: { intervals: Interval[] }) {
                     array={array}
                     count={intervals.length * 2}
                     itemSize={3}
-                    onUpdate={self => self.needsUpdate = true}
                 />
             </bufferGeometry>
             <lineBasicMaterial attach="material" color="white"/>
@@ -145,7 +144,7 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${radius}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <IntervalLines intervals={intervals}/>
+                <IntervalLines key={`intervals-${intervals.length}`} intervals={intervals}/>
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
