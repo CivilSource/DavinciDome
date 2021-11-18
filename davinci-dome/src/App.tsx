@@ -8,11 +8,9 @@ import {davinci, degreesToRadians, Interval} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
 
-interface Somewhere {
-    position: Vector3;
-}
-
-function Box({position}: Somewhere) {
+function Box({position}: {
+    position: Vector3,
+}) {
     return (
         <mesh position={position}>
             <boxGeometry args={[1, 1, 1]}/>
@@ -21,11 +19,14 @@ function Box({position}: Somewhere) {
     )
 }
 
-function Ball({position}: Somewhere) {
+function Ball({position, radius}: {
+    position: Vector3,
+    radius: number,
+}) {
     return (
         <mesh position={position}>
-            <sphereGeometry args={[0.05, 32, 16]}/>
-            <meshPhongMaterial color="blue"/>
+            <sphereGeometry args={[radius, 32, 16]}/>
+            <meshPhongMaterial color="green"/>
         </mesh>
     )
 }
@@ -61,18 +62,23 @@ const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15, 20]
 const DEGREES = 10
 const RADIUS = 7
 const CHIRALITY = Chirality.Left
+const BALLRADIUS = RADIUS / 100
 
 function App() {
+    const [ballRadius, setBallRadius] = useState(BALLRADIUS)
     const [chirality, setChirality] = useState(CHIRALITY)
     const [frequency, setFrequency] = useState(2)
     const [degrees, setDegrees] = useState(DEGREES)
+    const [radius, setRadius] = useState(RADIUS)
+    const [radiusInput, setRadiusInput] = useState(radius)
     const [radians, setRadians] = useState(degreesToRadians(DEGREES))
-    const [scaffold, setScaffold] = useState(new Scaffold(frequency, RADIUS, CHIRALITY))
+    const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, CHIRALITY))
     const [intervals, setIntervals] = useState(davinci(scaffold, radians))
     useEffect(() => {
         console.log(`frequency is ${frequency}`)
-        setScaffold(new Scaffold(frequency, RADIUS, chirality))
-    }, [frequency, chirality])
+        setScaffold(new Scaffold(frequency, radius, chirality))
+        setBallRadius(radius / 100)
+    }, [frequency, radius, chirality])
     useEffect(() => {
         console.log(`angle is ${radians}`)
         setIntervals(davinci(scaffold, radians))
@@ -92,6 +98,17 @@ function App() {
                 <br/>
                 <InputGroup>
                     <InputGroupText>
+                        Radius
+                    </InputGroupText>
+                    <Input
+                        value={radiusInput}
+                        onChange={event => {
+                            const v = event.target.value
+                            console.log(`v is ${v}`)
+                            setRadiusInput(parseInt(v))
+                        }}
+                    />
+                    <InputGroupText>
                         Degrees
                     </InputGroupText>
                     <Input
@@ -104,11 +121,11 @@ function App() {
                     />
                     <Button onClick={() => {
                         setRadians(degreesToRadians(degrees))
+                        setRadius(radiusInput)
                     }}>
                         go!
                     </Button>
                 </InputGroup>
-
                 <br/>
                 <ButtonGroup>
                     <Button color={chirality === Chirality.Left ? "success" : "secondary"}
@@ -126,10 +143,10 @@ function App() {
                 <pointLight position={[10, 10, 10]}/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${index}`} position={location}/>
+                    return <Ball key={`vertex-${radius}-${index}`} position={location} radius={ballRadius}/>
                 })}
                 <IntervalLines intervals={intervals}/>
-                <PerspectiveCamera makeDefault={true} position={[20, 1, 2]}/>
+                <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
         </div>
