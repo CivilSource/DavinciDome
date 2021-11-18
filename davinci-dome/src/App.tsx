@@ -49,6 +49,7 @@ function IntervalLines({intervals}: { intervals: Interval[] }) {
                     array={array}
                     count={intervals.length * 2}
                     itemSize={3}
+                    onUpdate={self => self.needsUpdate = true}
                 />
             </bufferGeometry>
             <lineBasicMaterial attach="material" color="white"/>
