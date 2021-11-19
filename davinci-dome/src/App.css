@@ -4,10 +4,17 @@ html {
 }
 
 .App {
-    text-align: center;
     min-height: 90vh;
 }
 
 .Canvas {
+    background-color: black;
     min-height: 100vh;
+}
+
+.top-left {
+    position: absolute;
+    top: 0.5em;
+    left: 1em;
+    z-index: 100;
 }
