@@ -18,3 +18,11 @@ html {
     left: 1em;
     z-index: 100;
 }
+
+.bottom-left {
+    position: absolute;
+    bottom: 0.5em;
+    left: 1em;
+    z-index: 100;
+}
+

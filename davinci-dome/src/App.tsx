@@ -4,9 +4,10 @@ import {Canvas} from "@react-three/fiber"
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Vector3} from 'three'
 import {Chirality, Scaffold} from './Scaffold'
-import {davinci, degreesToRadians, Interval} from "./Davinci"
+import {davinci, davinciOutput, degreesToRadians, Interval} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
+import {saveCSVZip} from "./Download"
 
 function Box({position}: {
     position: Vector3,
@@ -83,6 +84,13 @@ function App() {
     }, [frequency, radians, radius, chirality])
     return (
         <div className="App">
+            <div className="bottom-left">
+                <Button onClick={() => saveCSVZip(davinciOutput(intervals)) }>
+                    Download
+                </Button>
+
+            </div>
+
             <div className="top-left">
                 <ButtonGroup>
                     {FREQUENCIES.map(f => {

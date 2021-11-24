@@ -1,5 +1,6 @@
 import {Line3, Plane, Vector3} from "three"
 import {Chirality, Scaffold, Vertex} from "./Scaffold"
+import {DavinciOutput} from "./Download"
 
 export interface Interval {
     index: Number;
@@ -93,4 +94,15 @@ export function radiansToDegrees(radian: number) {
 
 export function degreesToRadians(degree: number) {
     return Math.PI * degree / 180
+}
+
+export function davinciOutput(intervals: Interval[]): DavinciOutput {
+    const nodes: Vector3[] = []
+    const csvIntervals: string[] = []
+    intervals.forEach((interval) => {
+        nodes.push(interval.pointA)
+        nodes.push(interval.pointB)
+        csvIntervals.push("not yet")
+    })
+    return {nodes, csvIntervals}
 }
