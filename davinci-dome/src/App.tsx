@@ -4,7 +4,7 @@ import {Canvas} from "@react-three/fiber"
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Vector3} from 'three'
 import {Chirality, Scaffold} from './Scaffold'
-import {davinci, davinciOutput, degreesToRadians, Interval} from "./Davinci"
+import {Bar, Bolt, davinci, davinciOutput, DavinciResult, degreesToRadians, RenderInterval} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
@@ -32,10 +32,36 @@ function Ball({position, radius}: {
     )
 }
 
-function IntervalLines({intervals}: { intervals: Interval[] }) {
-    const array = new Float32Array(intervals.length * 6)
+function BarLines({bars}: { bars: Bar[] }) {
+    const array = new Float32Array(bars.length * 6)
     let index = 0
-    intervals.forEach(({pointA, pointB}) => {
+    bars.forEach(({pointA, pointD}) => {
+        array[index++] = pointA.x
+        array[index++] = pointA.y
+        array[index++] = pointA.z
+        array[index++] = pointD.x
+        array[index++] = pointD.y
+        array[index++] = pointD.z
+    })
+    return (
+        <lineSegments>
+            <bufferGeometry attach="geometry">
+                <bufferAttribute
+                    attachObject={["attributes", "position"]}
+                    array={array}
+                    count={bars.length * 2}
+                    itemSize={3}
+                />
+            </bufferGeometry>
+            <lineBasicMaterial attach="material" color="white"/>
+        </lineSegments>
+    )
+}
+
+function BoltLines({bolts}: { bolts: Bolt[] }) {
+    const array = new Float32Array(bolts.length * 6)
+    let index = 0
+    bolts.forEach(({pointA, pointB}) => {
         array[index++] = pointA.x
         array[index++] = pointA.y
         array[index++] = pointA.z
@@ -49,11 +75,11 @@ function IntervalLines({intervals}: { intervals: Interval[] }) {
                 <bufferAttribute
                     attachObject={["attributes", "position"]}
                     array={array}
-                    count={intervals.length * 2}
+                    count={bolts.length * 2}
                     itemSize={3}
                 />
             </bufferGeometry>
-            <lineBasicMaterial attach="material" color="white"/>
+            <lineBasicMaterial attach="material" color="red"/>
         </lineSegments>
     )
 }
@@ -73,19 +99,19 @@ function App() {
     const [radiusInput, setRadiusInput] = useState(radius)
     const [radians, setRadians] = useState(degreesToRadians(DEGREES))
     const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, CHIRALITY))
-    const [intervals, setIntervals] = useState(davinci(scaffold, radians))
+    const [davinciResult, setDavinciResult] = useState(davinci(scaffold, radians))
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const freshScaffold = new Scaffold(frequency, radius, chirality)
         setScaffold(freshScaffold)
-        setIntervals(davinci(freshScaffold, radians))
+        setDavinciResult(davinci(freshScaffold, radians))
         setBallRadius(radius / 100)
         setVersion(version => version + 1)
     }, [frequency, radians, radius, chirality])
     return (
         <div className="App">
             <div className="bottom-left">
-                <Button onClick={() => saveCSVZip(davinciOutput(intervals)) }>
+                <Button onClick={() => saveCSVZip(davinciOutput(davinciResult.bars, []))}>
                     Download
                 </Button>
 
@@ -152,7 +178,8 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <IntervalLines key={`intervals-${version}`} intervals={intervals}/>
+                <BarLines key={`bars-${version}`} bars={davinciResult.bars}/>
+                <BoltLines key={`bolts-${version}`} bolts={davinciResult.bolts}/>
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>

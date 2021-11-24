@@ -2,9 +2,13 @@ import JSZip from "jszip"
 import FileSaver, {saveAs} from 'file-saver'
 import {Vector3} from "three"
 
+export interface DavinciInterval {
+    type: string
+}
+
 export interface DavinciOutput {
     nodes: Vector3[]
-    csvIntervals: string[]
+    csvIntervals: DavinciInterval[]
 }
 
 function extractNodeFile(output: DavinciOutput): string {
@@ -19,12 +23,11 @@ function extractNodeFile(output: DavinciOutput): string {
 
 function extractIntervalFile(output: DavinciOutput): string {
     const rows: string[][] = []
-    rows.push(["joints"])
+    rows.push(["joints", "type"])
     output.csvIntervals.forEach((interval, index) => {
-        rows.push([`"=""${index * 2 + 1},${index * 2 + 2}"""`])
+        rows.push([`"=""${index * 2 + 1},${index * 2 + 2}"""`, interval.type])
     })
     return rows.map(row => row.join(";")).join("\n")
-
 }
 
 function csvNumber(n: number): string {

@@ -1,91 +1,126 @@
 import {Line3, Plane, Vector3} from "three"
 import {Chirality, Scaffold, Vertex} from "./Scaffold"
-import {DavinciOutput} from "./Download"
+import {DavinciInterval, DavinciOutput} from "./Download"
 
-export interface Interval {
+export interface Bar {
     index: Number;
-    pointA: Vector3;
-    pointB: Vector3;
+    pointA: Vector3;//endpoint
+    pointB: Vector3;//intermediate
+    pointC: Vector3;//intermediate
+    pointD: Vector3;//endpoint
     vertexA: Vertex;
     vertexB: Vertex;
 }
 
-export interface Hub {
-    adjacentIntervals: Interval[];
+export interface Bolt {
+    pointA: Vector3;
+    pointB: Vector3;
 }
 
-function intervalName(vertexA: Vertex, vertexB: Vertex) {
+export interface RenderInterval {
+    pointA: Vector3;
+    pointB: Vector3;
+}
+
+export interface DavinciResult {
+    bars: Bar[]
+    bolts: Bolt[]
+}
+
+export interface Hub {
+    adjacentBars: Bar[];
+}
+
+function barName(vertexA: Vertex, vertexB: Vertex) {
     const min = Math.min(vertexA.index, vertexB.index)
     const max = Math.max(vertexA.index, vertexB.index)
     return `${min},${max}`
 }
 
-export function davinci(scaffold: Scaffold, angle: number) {
+export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
-    const intervals: Interval[] = []
-    const dictionary: Record<string, Interval> = {}
+    const bars: Bar[] = []
+    const dictionary: Record<string, Bar> = {}
     scaffold.vertices.forEach(vertex => {
         vertex.adjacent.forEach(adjacentVertex => {
             if (adjacentVertex.index > vertex.index) {
                 return
             }
-            const index = intervals.length
+            const index = bars.length
+            const pointB = new Vector3()
+            const pointC = new Vector3()
             const pointA = new Vector3().copy(vertex.location)
-            const pointB = new Vector3().copy(adjacentVertex.location)
+            const pointD = new Vector3().copy(adjacentVertex.location)
             const vertexA = vertex
             const vertexB = adjacentVertex
-            const interval: Interval = {index, pointA, pointB, vertexA, vertexB}
-            intervals.push(interval)
-            dictionary[intervalName(interval.vertexA, interval.vertexB)] = interval
+            const bar: Bar = {index, pointA, pointD, pointB, pointC, vertexA, vertexB}
+            bars.push(bar)
+            dictionary[barName(bar.vertexA, bar.vertexB)] = bar
         })
     })
     const hubs = scaffold.vertices.map(vertex => {
-        const adjacentIntervals = vertex.adjacent.map(adjacentVertex => {
-            return dictionary[intervalName(vertex, adjacentVertex)]
+        const adjacentBars = vertex.adjacent.map(adjacentVertex => {
+            return dictionary[barName(vertex, adjacentVertex)]
         })
-        const hub: Hub = {adjacentIntervals}
+        const hub: Hub = {adjacentBars}
         return hub
     })
-    intervals.forEach(({pointA, pointB}) => {
-        const axis = new Vector3().lerpVectors(pointA, pointB, 0.5).normalize()
+    bars.forEach(({pointA, pointD}) => {
+        const axis = new Vector3().lerpVectors(pointA, pointD, 0.5).normalize()
         pointA.applyAxisAngle(axis, twist)
-        pointB.applyAxisAngle(axis, twist)
+        pointD.applyAxisAngle(axis, twist)
     })
 
-    function intersect(planeInterval: Interval, lineInterval: Interval) {
-        const normal = new Vector3().crossVectors(planeInterval.pointA, planeInterval.pointB).normalize()
+    function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean) {
+        const normal = new Vector3().crossVectors(planeBar.pointA, planeBar.pointD).normalize()
         const plane = new Plane(normal)
-        const hubA = hubs[planeInterval.vertexA.index]
-        const adjacentIndex = hubA.adjacentIntervals.findIndex(adj => adj.index === planeInterval.index)
+        const hubA = hubs[planeBar.vertexA.index]
+        const adjacentIndex = hubA.adjacentBars.findIndex(adj => adj.index === planeBar.index)
         if (adjacentIndex < 0) {
             throw new Error("adjacent not found")
         }
         const extend = (start: Vector3, end: Vector3) =>
             new Vector3().copy(end).add(new Vector3().subVectors(end, start))
         const nextLine = new Line3(
-            extend(lineInterval.pointA, lineInterval.pointB),
-            extend(lineInterval.pointB, lineInterval.pointA)
+            extend(lineBar.pointA, lineBar.pointD),
+            extend(lineBar.pointD, lineBar.pointA)
         )
         const intersectionPoint = new Vector3()
         plane.intersectLine(nextLine, intersectionPoint)
-        const distA = intersectionPoint.distanceTo(lineInterval.pointA)
-        const distB = intersectionPoint.distanceTo(lineInterval.pointB)
-        if (distA < distB) {
-            lineInterval.pointA.copy(intersectionPoint)
+        const distA = intersectionPoint.distanceTo(lineBar.pointA)
+        const distB = intersectionPoint.distanceTo(lineBar.pointD)
+        const forward = distA < distB
+        if (forward) {
+            if (extendBar) {
+                lineBar.pointA.copy(intersectionPoint)
+
+            } else {
+                lineBar.pointB.copy(intersectionPoint)
+            }
         } else {
-            lineInterval.pointB.copy(intersectionPoint)
+            if (extendBar) {
+                lineBar.pointD.copy(intersectionPoint)
+            } else {
+                lineBar.pointC.copy(intersectionPoint)
+            }
         }
+        return intersectionPoint
     }
 
+    const bolts: Bolt [] = []
     hubs.forEach(hub => {
-        hub.adjacentIntervals.forEach((currentInterval, index) => {
-            const nextIndex = (index + 1) % hub.adjacentIntervals.length
-            const nextInterval = hub.adjacentIntervals[nextIndex]
-            intersect(currentInterval, nextInterval)
+        hub.adjacentBars.forEach((currentBar, index) => {
+            const nextIndex = (index + 1) % hub.adjacentBars.length
+            const nextBar = hub.adjacentBars[nextIndex]
+
+            const pointA = intersect(currentBar, nextBar, true)
+            const pointB = intersect(nextBar, currentBar, false)
+            const bolt: Bolt = {pointA, pointB}
+            bolts.push(bolt)
         })
     })
+    return {bars, bolts}
 
-    return intervals
 }
 
 export function radiansToDegrees(radian: number) {
@@ -96,13 +131,13 @@ export function degreesToRadians(degree: number) {
     return Math.PI * degree / 180
 }
 
-export function davinciOutput(intervals: Interval[]): DavinciOutput {
+export function davinciOutput(bars: Bar[], bolts: Bolt[]): DavinciOutput {
     const nodes: Vector3[] = []
-    const csvIntervals: string[] = []
-    intervals.forEach((interval) => {
-        nodes.push(interval.pointA)
-        nodes.push(interval.pointB)
-        csvIntervals.push("not yet")
+    const csvIntervals: DavinciInterval [] = []
+    bars.forEach((bar) => {
+        nodes.push(bar.pointA)
+        nodes.push(bar.pointD)
+        csvIntervals.push({type: "type 1"})
     })
     return {nodes, csvIntervals}
 }
