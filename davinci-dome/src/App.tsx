@@ -25,7 +25,7 @@ const INITIAL_RENDER_SPEC: DavinciSpec = {
     boltExtension: 0.2,
 }
 const ballRadius = (radius: number) => radius / 100
-const chiralityFromSpec = ({degrees}: DavinciSpec) => degrees > 0 ? Chirality.Right: Chirality.Left
+const chiralityFromSpec = ({degrees}: DavinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
 
 function App() {
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
@@ -51,10 +51,10 @@ function App() {
             <DavinciSpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
-                <pointLight position={[renderSpec.radius, renderSpec.radius * 4, renderSpec.radius * 2]} color="white"/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(renderSpec.radius)}/>
+                    return <Ball key={`vertex-${version}-${index}`} position={location}
+                                 radius={ballRadius(renderSpec.radius)}/>
                 })}
                 {davinciResult.bars.map((bar, index) => {
                     return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
@@ -62,7 +62,9 @@ function App() {
                 {davinciResult.bolts.map((bolt, index) => {
                     return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
                 })}
-                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}/>
+                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
+                    <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
+                </PerspectiveCamera>
                 <OrbitControls/>
             </Canvas>
         </div>
