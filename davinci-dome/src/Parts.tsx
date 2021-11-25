@@ -7,7 +7,7 @@ export function Box({position}: {
     return (
         <mesh position={position}>
             <boxGeometry args={[1, 1, 1]}/>
-            <meshStandardMaterial color="red"/>
+            <meshStandardMaterial transparent={true} opacity={0.8} color="slategray"/>
         </mesh>
     )
 }
@@ -99,7 +99,7 @@ export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) 
     return (
         <mesh matrix={basis} matrixAutoUpdate={false}>
             <boxBufferGeometry attach="geometry"/>
-            <meshLambertMaterial attach="material" color="grey"/>
+            <meshLambertMaterial attach="material" color="white"/>
         </mesh>
     )
 }
@@ -114,7 +114,7 @@ export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: Rende
     return (
         <mesh scale={scale} rotation={rotation} position={position}>
             <cylinderBufferGeometry attach="geometry" args={[1, 1, 1]}/>
-            <meshBasicMaterial attach="material" color="yellow"/>
+            <meshLambertMaterial attach="material" color="white"/>
         </mesh>
     )
 }

@@ -103,21 +103,19 @@ function App() {
                 </ButtonGroup>
             </div>
             <Canvas className="Canvas">
-                <ambientLight/>
-                <pointLight position={[10, 10, 10]}/>
+                <ambientLight intensity={0.05}/>
+                <pointLight position={[radius, radius * 4, radius * 2]} color="white"/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(radius)}/>
                 })}
-                {/*<BarLines key={`bars-${version}`} bars={davinciResult.bars}/>*/}
-                {/*<BoltLines key={`bolts-${version}`} bolts={davinciResult.bolts}/>*/}
                 {davinciResult.bars.map((bar, index) => {
                     return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={RENDER_SPEC}/>
                 })}
                 {davinciResult.bolts.map((bolt, index) => {
-                    return <BoltCylinder key={`bar-${version}-#${index}`} bolt={bolt} renderSpec={RENDER_SPEC}/>
+                    return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={RENDER_SPEC}/>
                 })}
-                <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
+                <PerspectiveCamera makeDefault={true} position={[radius * 3, 0, 0]}/>
                 <OrbitControls/>
             </Canvas>
         </div>
