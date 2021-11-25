@@ -8,30 +8,35 @@ import {davinci, davinciOutput, degreesToRadians} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
-import {Ball, BarBox, BarLines, BoltCylinder, BoltLines, Box} from "./Parts";
+import {Ball, BarBox, BoltCylinder, Box, RenderSpec} from "./Parts";
 
 const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15, 20]
-const DEGREES = 10
-const RADIUS = 7
-const CHIRALITY = Chirality.Left
-const BALLRADIUS = RADIUS / 100
+const INITIAL_DEGREES = 30
+const INITIAL_RADIUS = 7
+const INITIAL_CHIRALITY = Chirality.Left
+const RENDER_SPEC: RenderSpec = {
+    boltWidth: 0.05,
+    barWidth: 0.3,
+    barHeight: 0.02,
+    barExtension: 0.3,
+    boltExtension: 0.2,
+}
+const ballRadius = (radius: number) => radius / 100
 
 function App() {
-    const [ballRadius, setBallRadius] = useState(BALLRADIUS)
-    const [chirality, setChirality] = useState(CHIRALITY)
+    const [radius, setRadius] = useState(INITIAL_RADIUS)
+    const [chirality, setChirality] = useState(INITIAL_CHIRALITY)
     const [frequency, setFrequency] = useState(2)
-    const [degrees, setDegrees] = useState(DEGREES)
-    const [radius, setRadius] = useState(RADIUS)
+    const [degrees, setDegrees] = useState(INITIAL_DEGREES)
     const [radiusInput, setRadiusInput] = useState(radius)
-    const [radians, setRadians] = useState(degreesToRadians(DEGREES))
-    const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, CHIRALITY))
+    const [radians, setRadians] = useState(degreesToRadians(degrees))
+    const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, chirality))
     const [davinciResult, setDavinciResult] = useState(davinci(scaffold, radians))
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const freshScaffold = new Scaffold(frequency, radius, chirality)
         setScaffold(freshScaffold)
         setDavinciResult(davinci(freshScaffold, radians))
-        setBallRadius(radius / 100)
         setVersion(version => version + 1)
     }, [frequency, radians, radius, chirality])
     return (
@@ -102,12 +107,16 @@ function App() {
                 <pointLight position={[10, 10, 10]}/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius}/>
+                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(radius)}/>
                 })}
                 {/*<BarLines key={`bars-${version}`} bars={davinciResult.bars}/>*/}
                 {/*<BoltLines key={`bolts-${version}`} bolts={davinciResult.bolts}/>*/}
-                {davinciResult.bars.map(bar=> <BarBox bar={bar}/>)}
-                {davinciResult.bolts.map(bolt => <BoltCylinder bolt={bolt}/>)}
+                {davinciResult.bars.map((bar, index) => {
+                    return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={RENDER_SPEC}/>
+                })}
+                {davinciResult.bolts.map((bolt, index) => {
+                    return <BoltCylinder key={`bar-${version}-#${index}`} bolt={bolt} renderSpec={RENDER_SPEC}/>
+                })}
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>

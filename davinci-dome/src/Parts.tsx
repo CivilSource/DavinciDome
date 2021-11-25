@@ -76,13 +76,18 @@ export function BoltLines({bolts}: { bolts: Bolt[] }) {
     )
 }
 
-const BOLT_WIDTH = 0.05
-const BAR_WIDTH = 0.3
-const BAR_HEIGHT = 0.02
+export interface RenderSpec {
+    boltWidth: number
+    barWidth: number
+    barHeight: number
+    barExtension: number,
+    boltExtension: number,
+}
+
 const UP = new Vector3(0, 1, 0)
 const DOWN = new Vector3(0, -1, 0)
 
-export function BarBox({bar}: { bar: Bar }) {
+export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) {
     const length = bar.pointA.distanceTo(bar.pointD)
     const unit = new Vector3().subVectors(bar.pointD, bar.pointA).normalize()
     const midpoint = new Vector3().lerpVectors(bar.pointA, bar.pointD, 0.5)
@@ -90,7 +95,7 @@ export function BarBox({bar}: { bar: Bar }) {
     const basis = new Matrix4()
         .makeBasis(new Vector3().copy(midpoint).normalize(), unit, tangent)
         .setPosition(midpoint)
-        .scale(new Vector3(BAR_HEIGHT, length + BOLT_WIDTH * 6, BAR_WIDTH))
+        .scale(new Vector3(renderSpec.barHeight, length + renderSpec.barExtension, renderSpec.barWidth))
     return (
         <mesh matrix={basis} matrixAutoUpdate={false}>
             <boxBufferGeometry attach="geometry"/>
@@ -99,11 +104,11 @@ export function BarBox({bar}: { bar: Bar }) {
     )
 }
 
-export function BoltCylinder({bolt}: { bolt: Bolt }) {
+export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: RenderSpec }) {
     const length = bolt.pointA.distanceTo(bolt.pointB)
     const unit = new Vector3().subVectors(bolt.pointB, bolt.pointA).normalize()
     const position = new Vector3().lerpVectors(bolt.pointA, bolt.pointB, 0.5)
-    const scale = new Vector3(BOLT_WIDTH, length + BAR_HEIGHT * 8, BOLT_WIDTH)
+    const scale = new Vector3(renderSpec.boltWidth, length + renderSpec.boltExtension, renderSpec.boltWidth)
     const dot = UP.dot(unit)
     const rotation = new Euler().setFromQuaternion(new Quaternion().setFromUnitVectors(dot > 0 ? UP : DOWN, unit))
     return (
