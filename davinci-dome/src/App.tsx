@@ -10,7 +10,7 @@ import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
 import {Ball, BarBox, BoltCylinder, Box, RenderSpec} from "./Parts";
 
-const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15, 20]
+const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15]
 const INITIAL_DEGREES = 30
 const INITIAL_RADIUS = 7
 const INITIAL_CHIRALITY = Chirality.Left
