@@ -1,8 +1,21 @@
-import {RenderSpec} from "./Parts";
 import {Button, Form, FormGroup, Input, Label} from "reactstrap";
 import {useState} from "react";
 
+export interface RenderSpec {
+    frequency: number
+    degrees: number
+    radius: number
+    boltWidth: number
+    barWidth: number
+    barHeight: number
+    barExtension: number
+    boltExtension: number
+}
+
 export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: RenderSpec) => void }) {
+    const [frequency, setFrequency] = useState(spec.frequency.toString())
+    const [degrees, setDegrees] = useState(spec.degrees.toString())
+    const [radius, setRadius] = useState(spec.radius.toString())
     const [boltWidth, setBoltWidth] = useState(spec.boltWidth.toString())
     const [barWidth, setBarWidth] = useState(spec.barWidth.toString())
     const [barHeight, setBarHeight] = useState(spec.barHeight.toString())
@@ -11,13 +24,17 @@ export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: Render
 
     function handleSubmit() {
         const spec: RenderSpec = {
+            frequency: parseInt(frequency, 10),
+            degrees: parseFloat(degrees),
+            radius: parseFloat(radius),
             boltWidth: parseFloat(boltWidth),
             barWidth: parseFloat(barWidth),
             barHeight: parseFloat(barHeight),
             barExtension: parseFloat(barExtension),
             boltExtension: parseFloat(boltExtension)
         }
-        if (!(isNaN(spec.boltWidth) || isNaN(spec.barWidth) || isNaN(spec.barHeight)
+        if (!(isNaN(spec.frequency) || isNaN(spec.degrees) || isNaN(spec.radius) ||
+            isNaN(spec.boltWidth) || isNaN(spec.barWidth) || isNaN(spec.barHeight)
             || isNaN(spec.barExtension) || isNaN(spec.boltExtension))) {
             setSpec(spec)
         }
@@ -28,6 +45,30 @@ export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: Render
             event.preventDefault()
             handleSubmit()
         }} className="top-right bg-light">
+            <FormGroup>
+                <Label for="frequency">Frequency (not yet used)</Label>
+                <Input id="frequency"
+                       value={frequency}
+                       valid={!isNaN(parseInt(frequency))}
+                       invalid={isNaN(parseInt(frequency))}
+                       onChange={({target}) => setFrequency(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="degrees">Degrees (not yet used)</Label>
+                <Input id="degrees"
+                       value={degrees}
+                       valid={!isNaN(parseFloat(degrees))}
+                       invalid={isNaN(parseFloat(degrees))}
+                       onChange={({target}) => setDegrees(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="radius">Radius (not yet used)</Label>
+                <Input id="radius"
+                       value={radius}
+                       valid={!isNaN(parseFloat(radius))}
+                       invalid={isNaN(parseFloat(radius))}
+                       onChange={({target}) => setRadius(target.value)}/>
+            </FormGroup>
             <FormGroup>
                 <Label for="boltWidth">Bolt Width</Label>
                 <Input id="boltWidth"

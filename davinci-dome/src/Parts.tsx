@@ -1,5 +1,6 @@
 import {Euler, Matrix4, Quaternion, Vector3} from "three";
 import {Bar, Bolt} from "./Davinci";
+import {RenderSpec} from "./Spec";
 
 export function Box({position}: {
     position: Vector3,
@@ -74,14 +75,6 @@ export function BoltLines({bolts}: { bolts: Bolt[] }) {
             <lineBasicMaterial attach="material" color="red"/>
         </lineSegments>
     )
-}
-
-export interface RenderSpec {
-    boltWidth: number
-    barWidth: number
-    barHeight: number
-    barExtension: number,
-    boltExtension: number,
 }
 
 const UP = new Vector3(0, 1, 0)

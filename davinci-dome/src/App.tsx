@@ -8,14 +8,16 @@ import {davinci, davinciOutput, degreesToRadians} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
-import {Ball, BarBox, BoltCylinder, Box, RenderSpec} from "./Parts";
-import {Spec} from "./Spec";
+import {Ball, BarBox, BoltCylinder, Box} from "./Parts";
+import {RenderSpec, Spec} from "./Spec";
 
 const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15]
 const INITIAL_DEGREES = 30
-const INITIAL_RADIUS = 7
 const INITIAL_CHIRALITY = Chirality.Left
 const INITIAL_RENDER_SPEC: RenderSpec = {
+    frequency: 2,
+    degrees: 30,
+    radius: 7,
     boltWidth: 0.05,
     barWidth: 0.3,
     barHeight: 0.02,
@@ -26,9 +28,9 @@ const ballRadius = (radius: number) => radius / 100
 
 function App() {
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
-    const [radius, setRadius] = useState(INITIAL_RADIUS)
+    const [radius, setRadius] = useState(INITIAL_RENDER_SPEC.radius)
     const [chirality, setChirality] = useState(INITIAL_CHIRALITY)
-    const [frequency, setFrequency] = useState(2)
+    const [frequency, setFrequency] = useState(INITIAL_RENDER_SPEC.frequency)
     const [degrees, setDegrees] = useState(INITIAL_DEGREES)
     const [radiusInput, setRadiusInput] = useState(radius)
     const [radians, setRadians] = useState(degreesToRadians(degrees))
