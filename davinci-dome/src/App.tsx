@@ -4,85 +4,11 @@ import {Canvas} from "@react-three/fiber"
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Vector3} from 'three'
 import {Chirality, Scaffold} from './Scaffold'
-import {Bar, Bolt, davinci, davinciOutput, DavinciResult, degreesToRadians, RenderInterval} from "./Davinci"
+import {davinci, davinciOutput, degreesToRadians} from "./Davinci"
 import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
-
-function Box({position}: {
-    position: Vector3,
-}) {
-    return (
-        <mesh position={position}>
-            <boxGeometry args={[1, 1, 1]}/>
-            <meshStandardMaterial color="red"/>
-        </mesh>
-    )
-}
-
-function Ball({position, radius}: {
-    position: Vector3,
-    radius: number,
-}) {
-    return (
-        <mesh position={position}>
-            <sphereGeometry args={[radius, 32, 16]}/>
-            <meshPhongMaterial color="green"/>
-        </mesh>
-    )
-}
-
-function BarLines({bars}: { bars: Bar[] }) {
-    const array = new Float32Array(bars.length * 6)
-    let index = 0
-    bars.forEach(({pointA, pointD}) => {
-        array[index++] = pointA.x
-        array[index++] = pointA.y
-        array[index++] = pointA.z
-        array[index++] = pointD.x
-        array[index++] = pointD.y
-        array[index++] = pointD.z
-    })
-    return (
-        <lineSegments>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    attachObject={["attributes", "position"]}
-                    array={array}
-                    count={bars.length * 2}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            <lineBasicMaterial attach="material" color="white"/>
-        </lineSegments>
-    )
-}
-
-function BoltLines({bolts}: { bolts: Bolt[] }) {
-    const array = new Float32Array(bolts.length * 6)
-    let index = 0
-    bolts.forEach(({pointA, pointB}) => {
-        array[index++] = pointA.x
-        array[index++] = pointA.y
-        array[index++] = pointA.z
-        array[index++] = pointB.x
-        array[index++] = pointB.y
-        array[index++] = pointB.z
-    })
-    return (
-        <lineSegments>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    attachObject={["attributes", "position"]}
-                    array={array}
-                    count={bolts.length * 2}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            <lineBasicMaterial attach="material" color="red"/>
-        </lineSegments>
-    )
-}
+import {Ball, BarBox, BarLines, BoltCylinder, BoltLines, Box} from "./Parts";
 
 const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15, 20]
 const DEGREES = 10
@@ -178,8 +104,10 @@ function App() {
                 {scaffold.vertices.map(({index, location}) => {
                     return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius}/>
                 })}
-                <BarLines key={`bars-${version}`} bars={davinciResult.bars}/>
-                <BoltLines key={`bolts-${version}`} bolts={davinciResult.bolts}/>
+                {/*<BarLines key={`bars-${version}`} bars={davinciResult.bars}/>*/}
+                {/*<BoltLines key={`bolts-${version}`} bolts={davinciResult.bolts}/>*/}
+                {davinciResult.bars.map(bar=> <BarBox bar={bar}/>)}
+                {davinciResult.bolts.map(bolt => <BoltCylinder bolt={bolt}/>)}
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 1, 2]}/>
                 <OrbitControls/>
             </Canvas>
