@@ -9,12 +9,12 @@ import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
 import {Ball, BarBox, BoltCylinder, Box} from "./Parts";
-import {RenderSpec, Spec} from "./Spec";
+import {DavinciSpec, DavinciSpecEditor} from "./DavinciSpecEditor";
 
 const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15]
 const INITIAL_DEGREES = 30
 const INITIAL_CHIRALITY = Chirality.Left
-const INITIAL_RENDER_SPEC: RenderSpec = {
+const INITIAL_RENDER_SPEC: DavinciSpec = {
     frequency: 2,
     degrees: 30,
     radius: 7,
@@ -25,24 +25,21 @@ const INITIAL_RENDER_SPEC: RenderSpec = {
     boltExtension: 0.2,
 }
 const ballRadius = (radius: number) => radius / 100
+const chiralityFromSpec = ({degrees}: DavinciSpec) => degrees > 0 ? Chirality.Right: Chirality.Left
 
 function App() {
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
-    const [radius, setRadius] = useState(INITIAL_RENDER_SPEC.radius)
-    const [chirality, setChirality] = useState(INITIAL_CHIRALITY)
-    const [frequency, setFrequency] = useState(INITIAL_RENDER_SPEC.frequency)
-    const [degrees, setDegrees] = useState(INITIAL_DEGREES)
-    const [radiusInput, setRadiusInput] = useState(radius)
-    const [radians, setRadians] = useState(degreesToRadians(degrees))
-    const [scaffold, setScaffold] = useState(new Scaffold(frequency, radius, chirality))
-    const [davinciResult, setDavinciResult] = useState(davinci(scaffold, radians))
+    const [scaffold, setScaffold] = useState(new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)))
+    const [davinciResult, setDavinciResult] = useState(davinci(scaffold, degreesToRadians(renderSpec.degrees)))
     const [version, setVersion] = useState(0)
     useEffect(() => {
-        const freshScaffold = new Scaffold(frequency, radius, chirality)
+        const {frequency, radius, degrees} = renderSpec
+        const radians = degreesToRadians(degrees)
+        const freshScaffold = new Scaffold(frequency, radius, chiralityFromSpec(renderSpec))
         setScaffold(freshScaffold)
         setDavinciResult(davinci(freshScaffold, radians))
         setVersion(version => version + 1)
-    }, [frequency, radians, radius, chirality])
+    }, [renderSpec])
     return (
         <div className="App">
             <div className="bottom-left">
@@ -51,68 +48,13 @@ function App() {
                 </Button>
 
             </div>
-
-            <div className="top-left">
-                <ButtonGroup>
-                    {FREQUENCIES.map(f => {
-                        return (
-                            <Button key={`frequency-${f}`} color={f === frequency ? "success" : "secondary"}
-                                    onClick={() => setFrequency(f)}>
-                                {f}
-                            </Button>
-                        )
-                    })}
-                </ButtonGroup>
-                <br/>
-                <InputGroup>
-                    <InputGroupText>
-                        Radius
-                    </InputGroupText>
-                    <Input
-                        value={radiusInput}
-                        onChange={event => {
-                            const v = event.target.value
-                            console.log(`v is ${v}`)
-                            setRadiusInput(parseInt(v))
-                        }}
-                    />
-                    <InputGroupText>
-                        Degrees
-                    </InputGroupText>
-                    <Input
-                        value={degrees}
-                        onChange={event => {
-                            const v = event.target.value
-                            console.log(`v is ${v}`)
-                            setDegrees(parseInt(v))
-                        }}
-                    />
-                    <Button onClick={() => {
-                        setRadians(degreesToRadians(degrees))
-                        setRadius(radiusInput)
-                    }}>
-                        go!
-                    </Button>
-                </InputGroup>
-                <br/>
-                <ButtonGroup>
-                    <Button color={chirality === Chirality.Left ? "success" : "secondary"}
-                            onClick={() => setChirality(Chirality.Left)}>
-                        Left
-                    </Button>
-                    <Button color={chirality === Chirality.Right ? "success" : "secondary"}
-                            onClick={() => setChirality(Chirality.Right)}>
-                        Right
-                    </Button>
-                </ButtonGroup>
-            </div>
-            <Spec spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
+            <DavinciSpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
-                <pointLight position={[radius, radius * 4, radius * 2]} color="white"/>
+                <pointLight position={[renderSpec.radius, renderSpec.radius * 4, renderSpec.radius * 2]} color="white"/>
                 <Box position={new Vector3(0, 0, 0)}/>
                 {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(radius)}/>
+                    return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(renderSpec.radius)}/>
                 })}
                 {davinciResult.bars.map((bar, index) => {
                     return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
@@ -120,7 +62,7 @@ function App() {
                 {davinciResult.bolts.map((bolt, index) => {
                     return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
                 })}
-                <PerspectiveCamera makeDefault={true} position={[radius * 3, 0, 0]}/>
+                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}/>
                 <OrbitControls/>
             </Canvas>
         </div>

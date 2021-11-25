@@ -1,6 +1,6 @@
 import {Euler, Matrix4, Quaternion, Vector3} from "three";
 import {Bar, Bolt} from "./Davinci";
-import {RenderSpec} from "./Spec";
+import {DavinciSpec} from "./DavinciSpecEditor";
 
 export function Box({position}: {
     position: Vector3,
@@ -80,7 +80,7 @@ export function BoltLines({bolts}: { bolts: Bolt[] }) {
 const UP = new Vector3(0, 1, 0)
 const DOWN = new Vector3(0, -1, 0)
 
-export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) {
+export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DavinciSpec }) {
     const length = bar.pointA.distanceTo(bar.pointD)
     const unit = new Vector3().subVectors(bar.pointD, bar.pointA).normalize()
     const midpoint = new Vector3().lerpVectors(bar.pointA, bar.pointD, 0.5)
@@ -97,7 +97,7 @@ export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) 
     )
 }
 
-export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: RenderSpec }) {
+export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: DavinciSpec }) {
     const length = bolt.pointA.distanceTo(bolt.pointB)
     const unit = new Vector3().subVectors(bolt.pointB, bolt.pointA).normalize()
     const position = new Vector3().lerpVectors(bolt.pointA, bolt.pointB, 0.5)

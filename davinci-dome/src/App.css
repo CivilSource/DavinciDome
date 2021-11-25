@@ -17,6 +17,7 @@ html {
     top: 0.5em;
     left: 1em;
     z-index: 100;
+    padding: 1em;
 }
 
 .top-right {

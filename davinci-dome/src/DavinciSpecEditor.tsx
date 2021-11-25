@@ -1,7 +1,7 @@
 import {Button, Form, FormGroup, Input, Label} from "reactstrap";
 import {useState} from "react";
 
-export interface RenderSpec {
+export interface DavinciSpec {
     frequency: number
     degrees: number
     radius: number
@@ -12,7 +12,7 @@ export interface RenderSpec {
     boltExtension: number
 }
 
-export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: RenderSpec) => void }) {
+export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec: (spec: DavinciSpec) => void }) {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
     const [radius, setRadius] = useState(spec.radius.toString())
@@ -23,7 +23,7 @@ export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: Render
     const [boltExtension, setBoltExtension] = useState(spec.boltExtension.toString())
 
     function handleSubmit() {
-        const spec: RenderSpec = {
+        const spec: DavinciSpec = {
             frequency: parseInt(frequency, 10),
             degrees: parseFloat(degrees),
             radius: parseFloat(radius),
@@ -44,7 +44,10 @@ export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: Render
         <Form onSubmit={event => {
             event.preventDefault()
             handleSubmit()
-        }} className="top-right bg-light">
+        }} className="top-left bg-light">
+            <FormGroup>
+                <h3>Davinci Generator</h3>
+            </FormGroup>
             <FormGroup>
                 <Label for="frequency">Frequency (not yet used)</Label>
                 <Input id="frequency"
@@ -109,8 +112,9 @@ export function Spec({spec, setSpec}: { spec: RenderSpec, setSpec: (spec: Render
                        invalid={isNaN(parseFloat(barExtension))}
                        onChange={({target}) => setBarExtension(target.value)}/>
             </FormGroup>
-            <FormGroup className="float-end">
-                <Button type="submit">Go!</Button>
+            <hr/>
+            <FormGroup>
+                <Button  className="w-100" type="submit">Generate</Button>
             </FormGroup>
         </Form>
     )
