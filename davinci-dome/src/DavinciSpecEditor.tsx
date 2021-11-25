@@ -49,7 +49,7 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
                 <h3>Davinci Generator</h3>
             </FormGroup>
             <FormGroup>
-                <Label for="frequency">Frequency (not yet used)</Label>
+                <Label for="frequency">Frequency</Label>
                 <Input id="frequency"
                        value={frequency}
                        valid={!isNaN(parseInt(frequency))}
@@ -57,7 +57,7 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
                        onChange={({target}) => setFrequency(target.value)}/>
             </FormGroup>
             <FormGroup>
-                <Label for="degrees">Degrees (not yet used)</Label>
+                <Label for="degrees">Degrees</Label>
                 <Input id="degrees"
                        value={degrees}
                        valid={!isNaN(parseFloat(degrees))}
@@ -65,7 +65,7 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
                        onChange={({target}) => setDegrees(target.value)}/>
             </FormGroup>
             <FormGroup>
-                <Label for="radius">Radius (not yet used)</Label>
+                <Label for="radius">Radius</Label>
                 <Input id="radius"
                        value={radius}
                        valid={!isNaN(parseFloat(radius))}
