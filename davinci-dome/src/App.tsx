@@ -9,12 +9,13 @@ import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap
 import {useEffect, useState} from "react"
 import {saveCSVZip} from "./Download"
 import {Ball, BarBox, BoltCylinder, Box, RenderSpec} from "./Parts";
+import {Spec} from "./Spec";
 
 const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15]
 const INITIAL_DEGREES = 30
 const INITIAL_RADIUS = 7
 const INITIAL_CHIRALITY = Chirality.Left
-const RENDER_SPEC: RenderSpec = {
+const INITIAL_RENDER_SPEC: RenderSpec = {
     boltWidth: 0.05,
     barWidth: 0.3,
     barHeight: 0.02,
@@ -24,6 +25,7 @@ const RENDER_SPEC: RenderSpec = {
 const ballRadius = (radius: number) => radius / 100
 
 function App() {
+    const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
     const [radius, setRadius] = useState(INITIAL_RADIUS)
     const [chirality, setChirality] = useState(INITIAL_CHIRALITY)
     const [frequency, setFrequency] = useState(2)
@@ -102,6 +104,7 @@ function App() {
                     </Button>
                 </ButtonGroup>
             </div>
+            <Spec spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
                 <pointLight position={[radius, radius * 4, radius * 2]} color="white"/>
@@ -110,10 +113,10 @@ function App() {
                     return <Ball key={`vertex-${version}-${index}`} position={location} radius={ballRadius(radius)}/>
                 })}
                 {davinciResult.bars.map((bar, index) => {
-                    return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={RENDER_SPEC}/>
+                    return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
                 })}
                 {davinciResult.bolts.map((bolt, index) => {
-                    return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={RENDER_SPEC}/>
+                    return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
                 })}
                 <PerspectiveCamera makeDefault={true} position={[radius * 3, 0, 0]}/>
                 <OrbitControls/>

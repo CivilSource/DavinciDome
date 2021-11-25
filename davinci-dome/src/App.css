@@ -19,6 +19,14 @@ html {
     z-index: 100;
 }
 
+.top-right {
+    position: absolute;
+    top: 0.5em;
+    right: 1em;
+    z-index: 100;
+    padding: 2em;
+}
+
 .bottom-left {
     position: absolute;
     bottom: 0.5em;
