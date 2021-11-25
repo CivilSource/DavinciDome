@@ -34,7 +34,7 @@ function App() {
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
-        const radians = degreesToRadians(degrees)
+        const radians = Math.abs(degreesToRadians(degrees))
         const freshScaffold = new Scaffold(frequency, radius, chiralityFromSpec(renderSpec))
         setScaffold(freshScaffold)
         setDavinciResult(davinci(freshScaffold, radians))
@@ -52,10 +52,6 @@ function App() {
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
                 <Box position={new Vector3(0, 0, 0)}/>
-                {scaffold.vertices.map(({index, location}) => {
-                    return <Ball key={`vertex-${version}-${index}`} position={location}
-                                 radius={ballRadius(renderSpec.radius)}/>
-                })}
                 {davinciResult.bars.map((bar, index) => {
                     return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
                 })}
