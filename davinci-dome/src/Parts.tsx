@@ -1,6 +1,8 @@
-import {Euler, Matrix4, Quaternion, Vector3} from "three";
-import {Bar, Bolt} from "./Davinci";
-import {DavinciSpec} from "./DavinciSpecEditor";
+import * as React from "react"
+import {Euler, Matrix4, Quaternion, Vector3} from "three"
+
+import {Bar, Bolt} from "./Davinci"
+import {DavinciSpec} from "./DavinciSpecEditor"
 
 export function Box({position}: {
     position: Vector3,

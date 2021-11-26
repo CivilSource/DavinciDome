@@ -1,5 +1,6 @@
-import {Button, Form, FormGroup, Input, Label} from "reactstrap";
-import {useState} from "react";
+import * as React from "react"
+import {useState} from "react"
+import {Button, Form, FormGroup, Input, Label} from "reactstrap"
 
 export interface DavinciSpec {
     frequency: number
@@ -31,7 +32,7 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
             barWidth: parseFloat(barWidth),
             barHeight: parseFloat(barHeight),
             barExtension: parseFloat(barExtension),
-            boltExtension: parseFloat(boltExtension)
+            boltExtension: parseFloat(boltExtension),
         }
         if (!(isNaN(spec.frequency) || isNaN(spec.degrees) || isNaN(spec.radius) ||
             isNaN(spec.boltWidth) || isNaN(spec.barWidth) || isNaN(spec.barHeight)
