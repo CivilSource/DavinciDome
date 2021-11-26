@@ -1,5 +1,6 @@
 import {Euler, Matrix4, Quaternion, Vector3} from "three";
 import {Bar, Bolt} from "./Davinci";
+import {DavinciSpec} from "./DavinciSpecEditor";
 
 export function Box({position}: {
     position: Vector3,
@@ -7,7 +8,7 @@ export function Box({position}: {
     return (
         <mesh position={position}>
             <boxGeometry args={[1, 1, 1]}/>
-            <meshStandardMaterial color="red"/>
+            <meshStandardMaterial transparent={true} opacity={0.8} color="slategray"/>
         </mesh>
     )
 }
@@ -76,18 +77,10 @@ export function BoltLines({bolts}: { bolts: Bolt[] }) {
     )
 }
 
-export interface RenderSpec {
-    boltWidth: number
-    barWidth: number
-    barHeight: number
-    barExtension: number,
-    boltExtension: number,
-}
-
 const UP = new Vector3(0, 1, 0)
 const DOWN = new Vector3(0, -1, 0)
 
-export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) {
+export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DavinciSpec }) {
     const length = bar.pointA.distanceTo(bar.pointD)
     const unit = new Vector3().subVectors(bar.pointD, bar.pointA).normalize()
     const midpoint = new Vector3().lerpVectors(bar.pointA, bar.pointD, 0.5)
@@ -99,12 +92,12 @@ export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: RenderSpec }) 
     return (
         <mesh matrix={basis} matrixAutoUpdate={false}>
             <boxBufferGeometry attach="geometry"/>
-            <meshLambertMaterial attach="material" color="grey"/>
+            <meshLambertMaterial attach="material" color="white"/>
         </mesh>
     )
 }
 
-export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: RenderSpec }) {
+export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: DavinciSpec }) {
     const length = bolt.pointA.distanceTo(bolt.pointB)
     const unit = new Vector3().subVectors(bolt.pointB, bolt.pointA).normalize()
     const position = new Vector3().lerpVectors(bolt.pointA, bolt.pointB, 0.5)
@@ -114,7 +107,7 @@ export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: Rende
     return (
         <mesh scale={scale} rotation={rotation} position={position}>
             <cylinderBufferGeometry attach="geometry" args={[1, 1, 1]}/>
-            <meshBasicMaterial attach="material" color="yellow"/>
+            <meshLambertMaterial attach="material" color="white"/>
         </mesh>
     )
 }

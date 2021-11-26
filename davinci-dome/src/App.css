@@ -8,7 +8,7 @@ html {
 }
 
 .Canvas {
-    background-color: black;
+    background-color: #242434;
     min-height: 100vh;
 }
 
@@ -17,6 +17,15 @@ html {
     top: 0.5em;
     left: 1em;
     z-index: 100;
+    padding: 1em;
+}
+
+.top-right {
+    position: absolute;
+    top: 0.5em;
+    right: 1em;
+    z-index: 100;
+    padding: 2em;
 }
 
 .bottom-left {
