@@ -1,12 +1,12 @@
 import * as React from "react"
 import {Euler, Matrix4, Quaternion, Vector3} from "three"
 
-import {Bar, Bolt} from "./Davinci"
-import {DavinciSpec} from "./DavinciSpecEditor"
+import {Bar, Bolt} from "./DaVinci"
+import {DaVinciSpec} from "./DaVinciSpecEditor"
 
 export function Box({position}: {
     position: Vector3,
-}) {
+}): JSX.Element {
     return (
         <mesh position={position}>
             <boxGeometry args={[1, 1, 1]}/>
@@ -18,7 +18,7 @@ export function Box({position}: {
 export function Ball({position, radius}: {
     position: Vector3,
     radius: number,
-}) {
+}): JSX.Element {
     return (
         <mesh position={position}>
             <sphereGeometry args={[radius, 32, 16]}/>
@@ -27,62 +27,10 @@ export function Ball({position, radius}: {
     )
 }
 
-export function BarLines({bars}: { bars: Bar[] }) {
-    const array = new Float32Array(bars.length * 6)
-    let index = 0
-    bars.forEach(({pointA, pointD}) => {
-        array[index++] = pointA.x
-        array[index++] = pointA.y
-        array[index++] = pointA.z
-        array[index++] = pointD.x
-        array[index++] = pointD.y
-        array[index++] = pointD.z
-    })
-    return (
-        <lineSegments>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    attachObject={["attributes", "position"]}
-                    array={array}
-                    count={bars.length * 2}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            <lineBasicMaterial attach="material" color="white"/>
-        </lineSegments>
-    )
-}
-
-export function BoltLines({bolts}: { bolts: Bolt[] }) {
-    const array = new Float32Array(bolts.length * 6)
-    let index = 0
-    bolts.forEach(({pointA, pointB}) => {
-        array[index++] = pointA.x
-        array[index++] = pointA.y
-        array[index++] = pointA.z
-        array[index++] = pointB.x
-        array[index++] = pointB.y
-        array[index++] = pointB.z
-    })
-    return (
-        <lineSegments>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    attachObject={["attributes", "position"]}
-                    array={array}
-                    count={bolts.length * 2}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            <lineBasicMaterial attach="material" color="red"/>
-        </lineSegments>
-    )
-}
-
 const UP = new Vector3(0, 1, 0)
 const DOWN = new Vector3(0, -1, 0)
 
-export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DavinciSpec }) {
+export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DaVinciSpec }): JSX.Element {
     const length = bar.pointA.distanceTo(bar.pointD)
     const unit = new Vector3().subVectors(bar.pointD, bar.pointA).normalize()
     const midpoint = new Vector3().lerpVectors(bar.pointA, bar.pointD, 0.5)
@@ -99,7 +47,7 @@ export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DavinciSpec })
     )
 }
 
-export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: DavinciSpec }) {
+export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: DaVinciSpec }): JSX.Element {
     const length = bolt.pointA.distanceTo(bolt.pointB)
     const unit = new Vector3().subVectors(bolt.pointB, bolt.pointA).normalize()
     const position = new Vector3().lerpVectors(bolt.pointA, bolt.pointB, 0.5)
