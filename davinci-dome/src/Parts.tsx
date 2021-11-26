@@ -2,7 +2,7 @@ import * as React from "react"
 import {Euler, Matrix4, Quaternion, Vector3} from "three"
 
 import {Bar, Bolt} from "./DaVinci"
-import {DaVinciSpec} from "./DaVinciSpecEditor"
+import {DaVinciSpec} from "./DaVinciSpec"
 
 export function Box({position}: {
     position: Vector3,

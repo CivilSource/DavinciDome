@@ -5,10 +5,10 @@ import {Chirality, Scaffold, Vertex} from "./Scaffold"
 
 export interface Bar {
     index: number
-    pointA: Vector3// endpoint
-    pointB: Vector3// intermediate
-    pointC: Vector3// intermediate
-    pointD: Vector3// endpoint
+    pointA: Vector3
+    pointB: Vector3
+    pointC: Vector3
+    pointD: Vector3
     vertexA: Vertex
     vertexB: Vertex
 }
@@ -18,12 +18,7 @@ export interface Bolt {
     pointB: Vector3
 }
 
-export interface RenderInterval {
-    pointA: Vector3
-    pointB: Vector3
-}
-
-export interface DavinciResult {
+export interface DaVinciResult {
     bars: Bar[]
     bolts: Bolt[]
 }
@@ -38,7 +33,7 @@ function barName(vertexA: Vertex, vertexB: Vertex): string {
     return `${min},${max}`
 }
 
-export function daVinci(scaffold: Scaffold, angle: number): DavinciResult {
+export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
     const bars: Bar[] = []
     const dictionary: Record<string, Bar> = {}

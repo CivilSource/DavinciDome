@@ -8,7 +8,7 @@ import {Vector3} from "three"
 
 import "./App.css"
 import {daVinci, davinciOutput, degreesToRadians} from "./DaVinci"
-import {DaVinciSpec, DaVinciSpecEditor} from "./DaVinciSpecEditor"
+import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
 import {BarBox, BoltCylinder, Box} from "./Parts"
 import {Chirality, Scaffold} from "./Scaffold"
@@ -23,7 +23,6 @@ const INITIAL_RENDER_SPEC: DaVinciSpec = {
     barExtension: 0.3,
     boltExtension: 0.2,
 }
-const ballRadius = (radius: number) => radius / 100
 const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
 
 function App(): JSX.Element {
@@ -47,7 +46,7 @@ function App(): JSX.Element {
                 </Button>
 
             </div>
-            <DaVinciSpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
+            <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
                 <Box position={new Vector3(0, 0, 0)}/>

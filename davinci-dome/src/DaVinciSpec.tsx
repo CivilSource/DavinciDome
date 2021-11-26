@@ -13,7 +13,7 @@ export interface DaVinciSpec {
     boltExtension: number
 }
 
-export function DaVinciSpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec: DaVinciSpec) => void }): JSX.Element {
+export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec: DaVinciSpec) => void }): JSX.Element {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
     const [radius, setRadius] = useState(spec.radius.toString())
