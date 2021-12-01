@@ -1,5 +1,5 @@
+import FileSaver from "file-saver"
 import JSZip from "jszip"
-import FileSaver, {saveAs} from 'file-saver'
 import {Vector3} from "three"
 
 export interface DavinciInterval {

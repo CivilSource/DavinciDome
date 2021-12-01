@@ -1,9 +1,9 @@
-import {Vector3} from 'three'
+import {Vector3} from "three"
 
 export interface Vertex {
     index: number,
-    location: Vector3;
-    adjacent: Vertex[];
+    location: Vector3
+    adjacent: Vertex[]
 }
 
 function adjacent(v0: Vertex, v1: Vertex): void {
@@ -12,7 +12,7 @@ function adjacent(v0: Vertex, v1: Vertex): void {
 }
 
 export enum Chirality {
-    Left, Right
+    Left, Right,
 }
 
 export class Scaffold {
@@ -54,8 +54,8 @@ export class Scaffold {
         EDGE.forEach(edgeVertexIndex => {
             const verticesOfEdge: Vertex[] = []
             edgeVertices.push(verticesOfEdge)
-            let vertex: Vertex | undefined = undefined
-            let previousVertex: Vertex | undefined = undefined
+            let vertex: Vertex | undefined
+            let previousVertex: Vertex | undefined
             for (let walk = 0; walk < this.frequency - 1; walk++) {
                 previousVertex = vertex
                 const v0 = this.vertices[edgeVertexIndex[0]]
@@ -197,8 +197,8 @@ const FACE_EDGES = [
 ]
 
 interface PentagonVertex {
-    edge: number;
-    front: boolean;
+    edge: number
+    front: boolean
 }
 
 const PENTAGON_VERTICES: PentagonVertex[][] = [
@@ -229,7 +229,7 @@ const PENTAGON_VERTICES: PentagonVertex[][] = [
 ]
 
 // sort the adjacent vertices of a vertex in a clockwise way
-function sortVertex(vertex: Vertex, chirality: Chirality) {
+function sortVertex(vertex: Vertex, chirality: Chirality): void {
     const outward = new Vector3().copy(vertex.location).normalize()
     const first = vertex.adjacent.pop()
     if (!first) {
@@ -239,8 +239,8 @@ function sortVertex(vertex: Vertex, chirality: Chirality) {
     const vectorTo = ({location}: Vertex) => new Vector3().subVectors(location, vertex.location).normalize()
     while (vertex.adjacent.length > 0) {
         const top: Vertex = sorted[sorted.length - 1]
-        const next = vertex.adjacent.find(adjacent => {
-            const toAdjacent = vectorTo(adjacent)
+        const next = vertex.adjacent.find(v => {
+            const toAdjacent = vectorTo(v)
             const toTop = vectorTo(top)
             if (toAdjacent.dot(toTop) < 0.25) {
                 return false

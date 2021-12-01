@@ -1,43 +1,39 @@
 import {Line3, Plane, Vector3} from "three"
-import {Chirality, Scaffold, Vertex} from "./Scaffold"
+
 import {DavinciInterval, DavinciOutput} from "./Download"
+import {Chirality, Scaffold, Vertex} from "./Scaffold"
 
 export interface Bar {
-    index: Number;
-    pointA: Vector3;//endpoint
-    pointB: Vector3;//intermediate
-    pointC: Vector3;//intermediate
-    pointD: Vector3;//endpoint
-    vertexA: Vertex;
-    vertexB: Vertex;
+    index: number
+    pointA: Vector3
+    pointB: Vector3
+    pointC: Vector3
+    pointD: Vector3
+    vertexA: Vertex
+    vertexB: Vertex
 }
 
 export interface Bolt {
-    pointA: Vector3;
-    pointB: Vector3;
+    pointA: Vector3
+    pointB: Vector3
 }
 
-export interface RenderInterval {
-    pointA: Vector3;
-    pointB: Vector3;
-}
-
-export interface DavinciResult {
+export interface DaVinciResult {
     bars: Bar[]
     bolts: Bolt[]
 }
 
 export interface Hub {
-    adjacentBars: Bar[];
+    adjacentBars: Bar[]
 }
 
-function barName(vertexA: Vertex, vertexB: Vertex) {
+function barName(vertexA: Vertex, vertexB: Vertex): string {
     const min = Math.min(vertexA.index, vertexB.index)
     const max = Math.max(vertexA.index, vertexB.index)
     return `${min},${max}`
 }
 
-export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
+export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
     const bars: Bar[] = []
     const dictionary: Record<string, Bar> = {}
@@ -59,9 +55,7 @@ export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
         })
     })
     const hubs = scaffold.vertices.map(vertex => {
-        const adjacentBars = vertex.adjacent.map(adjacentVertex => {
-            return dictionary[barName(vertex, adjacentVertex)]
-        })
+        const adjacentBars = vertex.adjacent.map(adjacentVertex => dictionary[barName(vertex, adjacentVertex)])
         const hub: Hub = {adjacentBars}
         return hub
     })
@@ -71,7 +65,7 @@ export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
         pointD.applyAxisAngle(axis, twist)
     })
 
-    function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean) {
+    function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean): Vector3 {
         const normal = new Vector3().crossVectors(planeBar.pointA, planeBar.pointD).normalize()
         const plane = new Plane(normal)
         const hubA = hubs[planeBar.vertexA.index]
@@ -83,7 +77,7 @@ export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
             new Vector3().copy(end).add(new Vector3().subVectors(end, start))
         const nextLine = new Line3(
             extend(lineBar.pointA, lineBar.pointD),
-            extend(lineBar.pointD, lineBar.pointA)
+            extend(lineBar.pointD, lineBar.pointA),
         )
         const intersectionPoint = new Vector3()
         plane.intersectLine(nextLine, intersectionPoint)
@@ -123,11 +117,11 @@ export function davinci(scaffold: Scaffold, angle: number): DavinciResult {
 
 }
 
-export function radiansToDegrees(radian: number) {
+export function radiansToDegrees(radian: number): number {
     return 180 / (radian * Math.PI)
 }
 
-export function degreesToRadians(degree: number) {
+export function degreesToRadians(degree: number): number {
     return Math.PI * degree / 180
 }
 

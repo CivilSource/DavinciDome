@@ -1,7 +1,8 @@
-import {Button, Form, FormGroup, Input, Label} from "reactstrap";
-import {useState} from "react";
+import * as React from "react"
+import {useState} from "react"
+import {Button, Form, FormGroup, Input, Label} from "reactstrap"
 
-export interface DavinciSpec {
+export interface DaVinciSpec {
     frequency: number
     degrees: number
     radius: number
@@ -12,7 +13,7 @@ export interface DavinciSpec {
     boltExtension: number
 }
 
-export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec: (spec: DavinciSpec) => void }) {
+export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec: DaVinciSpec) => void }): JSX.Element {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
     const [radius, setRadius] = useState(spec.radius.toString())
@@ -22,8 +23,8 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
     const [barExtension, setBarExtension] = useState(spec.barExtension.toString())
     const [boltExtension, setBoltExtension] = useState(spec.boltExtension.toString())
 
-    function handleSubmit() {
-        const spec: DavinciSpec = {
+    function handleSubmit():void {
+        const daVinciSpec: DaVinciSpec = {
             frequency: parseInt(frequency, 10),
             degrees: parseFloat(degrees),
             radius: parseFloat(radius),
@@ -31,12 +32,12 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
             barWidth: parseFloat(barWidth),
             barHeight: parseFloat(barHeight),
             barExtension: parseFloat(barExtension),
-            boltExtension: parseFloat(boltExtension)
+            boltExtension: parseFloat(boltExtension),
         }
-        if (!(isNaN(spec.frequency) || isNaN(spec.degrees) || isNaN(spec.radius) ||
-            isNaN(spec.boltWidth) || isNaN(spec.barWidth) || isNaN(spec.barHeight)
-            || isNaN(spec.barExtension) || isNaN(spec.boltExtension))) {
-            setSpec(spec)
+        if (!(isNaN(daVinciSpec.frequency) || isNaN(daVinciSpec.degrees) || isNaN(daVinciSpec.radius) ||
+            isNaN(daVinciSpec.boltWidth) || isNaN(daVinciSpec.barWidth) || isNaN(daVinciSpec.barHeight)
+            || isNaN(daVinciSpec.barExtension) || isNaN(daVinciSpec.boltExtension))) {
+            setSpec(daVinciSpec)
         }
     }
 
@@ -46,14 +47,14 @@ export function DavinciSpecEditor({spec, setSpec}: { spec: DavinciSpec, setSpec:
             handleSubmit()
         }} className="top-left bg-light">
             <FormGroup>
-                <h3>Davinci Generator</h3>
+                <h3>Da Vinci Generator</h3>
             </FormGroup>
             <FormGroup>
                 <Label for="frequency">Frequency</Label>
                 <Input id="frequency"
                        value={frequency}
-                       valid={!isNaN(parseInt(frequency))}
-                       invalid={isNaN(parseInt(frequency))}
+                       valid={!isNaN(parseInt(frequency, 10))}
+                       invalid={isNaN(parseInt(frequency, 10))}
                        onChange={({target}) => setFrequency(target.value)}/>
             </FormGroup>
             <FormGroup>

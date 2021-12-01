@@ -1,20 +1,19 @@
-import './App.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import {Canvas} from "@react-three/fiber"
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
-import {Vector3} from 'three'
-import {Chirality, Scaffold} from './Scaffold'
-import {davinci, davinciOutput, degreesToRadians} from "./Davinci"
-import {Button, ButtonGroup, Input, InputGroup, InputGroupText} from "reactstrap"
+import {Canvas} from "@react-three/fiber"
+import "bootstrap/dist/css/bootstrap.min.css"
+import * as React from "react"
 import {useEffect, useState} from "react"
-import {saveCSVZip} from "./Download"
-import {Ball, BarBox, BoltCylinder, Box} from "./Parts";
-import {DavinciSpec, DavinciSpecEditor} from "./DavinciSpecEditor";
+import {Button} from "reactstrap"
+import {Vector3} from "three"
 
-const FREQUENCIES = [1, 2, 3, 4, 5, 10, 15]
-const INITIAL_DEGREES = 30
-const INITIAL_CHIRALITY = Chirality.Left
-const INITIAL_RENDER_SPEC: DavinciSpec = {
+import "./App.css"
+import {daVinci, davinciOutput, degreesToRadians} from "./DaVinci"
+import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
+import {saveCSVZip} from "./Download"
+import {BarBox, BoltCylinder, Box} from "./Parts"
+import {Chirality, Scaffold} from "./Scaffold"
+
+const INITIAL_RENDER_SPEC: DaVinciSpec = {
     frequency: 2,
     degrees: 30,
     radius: 7,
@@ -24,21 +23,20 @@ const INITIAL_RENDER_SPEC: DavinciSpec = {
     barExtension: 0.3,
     boltExtension: 0.2,
 }
-const ballRadius = (radius: number) => radius / 100
-const chiralityFromSpec = ({degrees}: DavinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
+const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
 
-function App() {
+function App(): JSX.Element {
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
     const [scaffold, setScaffold] = useState(new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)))
-    const [davinciResult, setDavinciResult] = useState(davinci(scaffold, degreesToRadians(renderSpec.degrees)))
+    const [davinciResult, setDavinciResult] = useState(daVinci(scaffold, degreesToRadians(renderSpec.degrees)))
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
         const radians = Math.abs(degreesToRadians(degrees))
         const freshScaffold = new Scaffold(frequency, radius, chiralityFromSpec(renderSpec))
         setScaffold(freshScaffold)
-        setDavinciResult(davinci(freshScaffold, radians))
-        setVersion(version => version + 1)
+        setDavinciResult(daVinci(freshScaffold, radians))
+        setVersion(v => v + 1)
     }, [renderSpec])
     return (
         <div className="App">
@@ -48,16 +46,12 @@ function App() {
                 </Button>
 
             </div>
-            <DavinciSpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
+            <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
                 <Box position={new Vector3(0, 0, 0)}/>
-                {davinciResult.bars.map((bar, index) => {
-                    return <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
-                })}
-                {davinciResult.bolts.map((bolt, index) => {
-                    return <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
-                })}
+                {davinciResult.bars.map((bar, index) => <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>)}
+                {davinciResult.bolts.map((bolt, index) => <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>)}
                 <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
                     <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
                 </PerspectiveCamera>
