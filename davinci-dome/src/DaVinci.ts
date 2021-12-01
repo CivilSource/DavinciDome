@@ -1,26 +1,33 @@
 import {Line3, Plane, Vector3} from "three"
 
-import {DavinciInterval, DavinciOutput} from "./Download"
+import {DaVinciInterval, DaVinciOutput} from "./Download"
 import {Chirality, Scaffold, Vertex} from "./Scaffold"
+
+export interface Joint {
+    index: number
+    point: Vector3
+}
 
 export interface Bar {
     index: number
-    pointA: Vector3
-    pointB: Vector3
-    pointC: Vector3
-    pointD: Vector3
+    jointA: Joint
+    jointB: Joint
+    jointC: Joint
+    jointD: Joint
     vertexA: Vertex
     vertexB: Vertex
 }
 
 export interface Bolt {
-    pointA: Vector3
-    pointB: Vector3
+    index: number
+    jointA: Joint
+    jointB: Joint
 }
 
 export interface DaVinciResult {
     bars: Bar[]
     bolts: Bolt[]
+    joints: Joint[]
 }
 
 export interface Hub {
@@ -35,6 +42,15 @@ function barName(vertexA: Vertex, vertexB: Vertex): string {
 
 export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
+    const joints: Joint[] = []
+
+    function freshJoint(point: Vector3): Joint {
+        const index = joints.length
+        const node: Joint = {index, point}
+        joints.push(node)
+        return node
+    }
+
     const bars: Bar[] = []
     const dictionary: Record<string, Bar> = {}
     scaffold.vertices.forEach(vertex => {
@@ -43,13 +59,13 @@ export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
                 return
             }
             const index = bars.length
-            const pointB = new Vector3()
-            const pointC = new Vector3()
-            const pointA = new Vector3().copy(vertex.location)
-            const pointD = new Vector3().copy(adjacentVertex.location)
+            const jointA = freshJoint(new Vector3().copy(vertex.location))
+            const jointB = freshJoint(new Vector3())
+            const jointC = freshJoint(new Vector3())
+            const jointD = freshJoint(new Vector3().copy(adjacentVertex.location))
             const vertexA = vertex
             const vertexB = adjacentVertex
-            const bar: Bar = {index, pointA, pointD, pointB, pointC, vertexA, vertexB}
+            const bar: Bar = {index, jointA, jointD, jointB, jointC, vertexA, vertexB}
             bars.push(bar)
             dictionary[barName(bar.vertexA, bar.vertexB)] = bar
         })
@@ -59,14 +75,14 @@ export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
         const hub: Hub = {adjacentBars}
         return hub
     })
-    bars.forEach(({pointA, pointD}) => {
-        const axis = new Vector3().lerpVectors(pointA, pointD, 0.5).normalize()
-        pointA.applyAxisAngle(axis, twist)
-        pointD.applyAxisAngle(axis, twist)
+    bars.forEach(({jointA, jointD}) => {
+        const axis = new Vector3().lerpVectors(jointA.point, jointD.point, 0.5).normalize()
+        jointA.point.applyAxisAngle(axis, twist)
+        jointD.point.applyAxisAngle(axis, twist)
     })
 
-    function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean): Vector3 {
-        const normal = new Vector3().crossVectors(planeBar.pointA, planeBar.pointD).normalize()
+    function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean): Joint {
+        const normal = new Vector3().crossVectors(planeBar.jointA.point, planeBar.jointD.point).normalize()
         const plane = new Plane(normal)
         const hubA = hubs[planeBar.vertexA.index]
         const adjacentIndex = hubA.adjacentBars.findIndex(adj => adj.index === planeBar.index)
@@ -76,29 +92,31 @@ export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
         const extend = (start: Vector3, end: Vector3) =>
             new Vector3().copy(end).add(new Vector3().subVectors(end, start))
         const nextLine = new Line3(
-            extend(lineBar.pointA, lineBar.pointD),
-            extend(lineBar.pointD, lineBar.pointA),
+            extend(lineBar.jointA.point, lineBar.jointD.point),
+            extend(lineBar.jointD.point, lineBar.jointA.point),
         )
         const intersectionPoint = new Vector3()
         plane.intersectLine(nextLine, intersectionPoint)
-        const distA = intersectionPoint.distanceTo(lineBar.pointA)
-        const distB = intersectionPoint.distanceTo(lineBar.pointD)
+        const distA = intersectionPoint.distanceTo(lineBar.jointA.point)
+        const distB = intersectionPoint.distanceTo(lineBar.jointD.point)
         const forward = distA < distB
         if (forward) {
             if (extendBar) {
-                lineBar.pointA.copy(intersectionPoint)
-
+                lineBar.jointA.point.copy(intersectionPoint)
+                return lineBar.jointA
             } else {
-                lineBar.pointB.copy(intersectionPoint)
+                lineBar.jointB.point.copy(intersectionPoint)
+                return lineBar.jointB
             }
         } else {
             if (extendBar) {
-                lineBar.pointD.copy(intersectionPoint)
+                lineBar.jointD.point.copy(intersectionPoint)
+                return lineBar.jointD
             } else {
-                lineBar.pointC.copy(intersectionPoint)
+                lineBar.jointC.point.copy(intersectionPoint)
+                return lineBar.jointC
             }
         }
-        return intersectionPoint
     }
 
     const bolts: Bolt [] = []
@@ -106,15 +124,13 @@ export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
         hub.adjacentBars.forEach((currentBar, index) => {
             const nextIndex = (index + 1) % hub.adjacentBars.length
             const nextBar = hub.adjacentBars[nextIndex]
-
-            const pointA = intersect(currentBar, nextBar, true)
-            const pointB = intersect(nextBar, currentBar, false)
-            const bolt: Bolt = {pointA, pointB}
+            const nodeA = intersect(currentBar, nextBar, true)
+            const nodeB = intersect(nextBar, currentBar, false)
+            const bolt: Bolt = {jointA: nodeA, jointB: nodeB, index: bars.length + bolts.length}
             bolts.push(bolt)
         })
     })
-    return {bars, bolts}
-
+    return {bars, bolts, joints}
 }
 
 export function radiansToDegrees(radian: number): number {
@@ -125,13 +141,19 @@ export function degreesToRadians(degree: number): number {
     return Math.PI * degree / 180
 }
 
-export function davinciOutput(bars: Bar[], bolts: Bolt[]): DavinciOutput {
-    const nodes: Vector3[] = []
-    const csvIntervals: DavinciInterval [] = []
+export function daVinciOutput(bars: Bar[], bolts: Bolt[], joints: Joint[]): DaVinciOutput {
+    const daVinciIntervals: DaVinciInterval [] = []
     bars.forEach((bar) => {
-        nodes.push(bar.pointA)
-        nodes.push(bar.pointD)
-        csvIntervals.push({type: "type 1"})
+        daVinciIntervals.push({
+            nodeIndexes: [bar.jointA.index, bar.jointB.index, bar.jointC.index, bar.jointD.index],
+            type: "type 1",
+        })
     })
-    return {nodes, csvIntervals}
+    bolts.forEach((bolt) => {
+        daVinciIntervals.push({
+            nodeIndexes: [bolt.jointA.index, bolt.jointB.index],
+            type: "type 2",
+        })
+    })
+    return {joints, daVinciIntervals}
 }

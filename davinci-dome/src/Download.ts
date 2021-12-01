@@ -1,31 +1,34 @@
 import FileSaver from "file-saver"
 import JSZip from "jszip"
-import {Vector3} from "three"
 
-export interface DavinciInterval {
+import {Joint} from "./DaVinci"
+
+export interface DaVinciInterval {
+    nodeIndexes: number[]
     type: string
 }
 
-export interface DavinciOutput {
-    nodes: Vector3[]
-    csvIntervals: DavinciInterval[]
+export interface DaVinciOutput {
+    joints: Joint[]
+    daVinciIntervals: DaVinciInterval[]
 }
 
-function extractNodeFile(output: DavinciOutput): string {
+function extractNodeFile(output: DaVinciOutput): string {
     const rows: string[][] = []
     rows.push(["index", "x", "y", "z"])
-    output.nodes.forEach((node, index) => rows.push([
+    output.joints.forEach((joint, index) => rows.push([
         (index + 1).toFixed(0),
-        csvNumber(node.x), csvNumber(node.y), csvNumber(node.z),
+        csvNumber(joint.point.x), csvNumber(joint.point.y), csvNumber(joint.point.z),
     ]))
     return rows.map(row => row.join(";")).join("\n")
 }
 
-function extractIntervalFile(output: DavinciOutput): string {
+function extractIntervalFile(output: DaVinciOutput): string {
     const rows: string[][] = []
     rows.push(["joints", "type"])
-    output.csvIntervals.forEach((interval, index) => {
-        rows.push([`"=""${index * 2 + 1},${index * 2 + 2}"""`, interval.type])
+    output.daVinciIntervals.forEach((interval, index) => {
+        const indexString = interval.nodeIndexes.map(i => i + 1).join(",")
+        rows.push([`"=""${indexString}"""`, interval.type])
     })
     return rows.map(row => row.join(";")).join("\n")
 }
@@ -39,9 +42,9 @@ function dateString(): string {
         .replace(/[.].*/, "").replace(/[:T_]/g, "-")
 }
 
-export function saveCSVZip(output: DavinciOutput): void {
+export function saveCSVZip(output: DaVinciOutput): void {
     const zip = new JSZip()
-    zip.file("nodes.csv", extractNodeFile(output))
+    zip.file("joints.csv", extractNodeFile(output))
     zip.file("intervals.csv", extractIntervalFile(output))
     zip.generateAsync({type: "blob", mimeType: "application/zip"}).then(blob => {
         FileSaver.saveAs(blob, `davinci-${dateString()}.zip`)
