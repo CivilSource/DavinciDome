@@ -7,7 +7,7 @@ import {Button} from "reactstrap"
 import {Vector3} from "three"
 
 import "./App.css"
-import {daVinci, davinciOutput, degreesToRadians} from "./DaVinci"
+import {daVinci, daVinciOutput, degreesToRadians} from "./DaVinci"
 import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
 import {BarBox, BoltCylinder, Box} from "./Parts"
@@ -41,7 +41,8 @@ function App(): JSX.Element {
     return (
         <div className="App">
             <div className="bottom-left">
-                <Button onClick={() => saveCSVZip(davinciOutput(davinciResult.bars, []))}>
+                <Button
+                    onClick={() => saveCSVZip(daVinciOutput(davinciResult.bars, davinciResult.bolts, davinciResult.joints))}>
                     Download
                 </Button>
 
@@ -50,8 +51,10 @@ function App(): JSX.Element {
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
                 <Box position={new Vector3(0, 0, 0)}/>
-                {davinciResult.bars.map((bar, index) => <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>)}
-                {davinciResult.bolts.map((bolt, index) => <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>)}
+                {davinciResult.bars.map((bar, index) => <BarBox key={`bar-${version}-#${index}`} bar={bar}
+                                                                renderSpec={renderSpec}/>)}
+                {davinciResult.bolts.map((bolt, index) => <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt}
+                                                                        renderSpec={renderSpec}/>)}
                 <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
                     <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
                 </PerspectiveCamera>
