@@ -23,7 +23,7 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
     const [barExtension, setBarExtension] = useState(spec.barExtension.toString())
     const [boltExtension, setBoltExtension] = useState(spec.boltExtension.toString())
 
-    function handleSubmit():void {
+    function handleSubmit(): void {
         const daVinciSpec: DaVinciSpec = {
             frequency: parseInt(frequency, 10),
             degrees: parseFloat(degrees),
@@ -34,11 +34,19 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
             barExtension: parseFloat(barExtension),
             boltExtension: parseFloat(boltExtension),
         }
-        if (!(isNaN(daVinciSpec.frequency) || isNaN(daVinciSpec.degrees) || isNaN(daVinciSpec.radius) ||
+        if (!(!isFrequencyValid(frequency) || isNaN(daVinciSpec.degrees) || isNaN(daVinciSpec.radius) ||
             isNaN(daVinciSpec.boltWidth) || isNaN(daVinciSpec.barWidth) || isNaN(daVinciSpec.barHeight)
             || isNaN(daVinciSpec.barExtension) || isNaN(daVinciSpec.boltExtension))) {
             setSpec(daVinciSpec)
         }
+    }
+
+    function isFrequencyValid(value: string): boolean {
+        const f = parseInt(value, 10)
+        if (isNaN(f)) {
+            return false
+        }
+        return f <= 10 && f > 0
     }
 
     return (
@@ -50,11 +58,11 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
                 <h3>Da Vinci Generator</h3>
             </FormGroup>
             <FormGroup>
-                <Label for="frequency">Frequency</Label>
+                <Label for="frequency">Frequency (1-10)</Label>
                 <Input id="frequency"
                        value={frequency}
-                       valid={!isNaN(parseInt(frequency, 10))}
-                       invalid={isNaN(parseInt(frequency, 10))}
+                       valid={isFrequencyValid(frequency)}
+                       invalid={!isFrequencyValid(frequency)}
                        onChange={({target}) => setFrequency(target.value)}/>
             </FormGroup>
             <FormGroup>
@@ -115,7 +123,7 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
             </FormGroup>
             <hr/>
             <FormGroup>
-                <Button  className="w-100" type="submit">Generate</Button>
+                <Button className="w-100" type="submit">Generate</Button>
             </FormGroup>
         </Form>
     )
