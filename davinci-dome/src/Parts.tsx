@@ -4,16 +4,6 @@ import {Euler, Matrix4, Quaternion, Vector3} from "three"
 import {Bar, Bolt} from "./DaVinci"
 import {DaVinciSpec} from "./DaVinciSpec"
 
-export function Box({position}: {
-    position: Vector3,
-}): JSX.Element {
-    return (
-        <mesh position={position}>
-            <boxGeometry args={[1, 1, 1]}/>
-            <meshStandardMaterial transparent={true} opacity={0.8} color="slategray"/>
-        </mesh>
-    )
-}
 
 export function Ball({position, radius}: {
     position: Vector3,
@@ -57,7 +47,7 @@ export function BoltCylinder({bolt, renderSpec}: { bolt: Bolt, renderSpec: DaVin
     return (
         <mesh scale={scale} rotation={rotation} position={position}>
             <cylinderBufferGeometry attach="geometry" args={[1, 1, 1]}/>
-            <meshLambertMaterial attach="material" color="white"/>
+            <meshLambertMaterial attach="material" color="orange"/>
         </mesh>
     )
 }

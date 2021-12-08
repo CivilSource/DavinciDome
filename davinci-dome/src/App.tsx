@@ -4,13 +4,12 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import * as React from "react"
 import {useEffect, useState} from "react"
 import {Button} from "reactstrap"
-import {Vector3} from "three"
 
 import "./App.css"
 import {daVinci, daVinciOutput, degreesToRadians} from "./DaVinci"
 import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
-import {BarBox, BoltCylinder, Box} from "./Parts"
+import {BarBox, BoltCylinder} from "./Parts"
 import {Chirality, Scaffold} from "./Scaffold"
 
 const INITIAL_RENDER_SPEC: DaVinciSpec = {
@@ -50,11 +49,23 @@ function App(): JSX.Element {
             <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
-                <Box position={new Vector3(0, 0, 0)}/>
-                {davinciResult.bars.map((bar, index) => <BarBox key={`bar-${version}-#${index}`} bar={bar}
-                                                                renderSpec={renderSpec}/>)}
-                {davinciResult.bolts.map((bolt, index) => <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt}
-                                                                        renderSpec={renderSpec}/>)}
+                <mesh onClick={event => {
+                    const face = event.face
+                    if (!face) {
+                        return
+                    }
+                    const position = face.normal.multiplyScalar(renderSpec.radius * 3)
+                    event.camera.position.copy(position)
+                }}>
+                    <boxGeometry args={[1, 1, 1]}/>
+                    <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
+                </mesh>
+                {davinciResult.bars.map((bar, index) => (
+                    <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
+                ))}
+                {davinciResult.bolts.map((bolt, index) => (
+                    <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
+                ))}
                 <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
                     <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
                 </PerspectiveCamera>
