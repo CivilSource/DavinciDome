@@ -26,7 +26,19 @@ a {
     top: 0.5em;
     left: 1em;
     z-index: 100;
+}
+
+.spec-editor {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    text-align: center;
+    width: 50em;
     padding: 1em;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
 }
 
 .top-right {
@@ -41,6 +53,14 @@ a {
     position: absolute;
     bottom: 0.5em;
     left: 1em;
+    z-index: 100;
+}
+
+.bottom-middle {
+    position: absolute;
+    bottom: 0.5em;
+    left: 50%;
+    transform: translate(-50%, 0);
     z-index: 100;
 }
 
