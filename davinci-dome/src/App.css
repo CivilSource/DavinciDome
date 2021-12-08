@@ -3,6 +3,10 @@ html {
     min-height: 100vh;
 }
 
+a {
+    color: darkorange;
+}
+
 .App {
     min-height: 90vh;
 }

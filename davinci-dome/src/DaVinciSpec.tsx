@@ -55,7 +55,7 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
             handleSubmit()
         }} className="top-left bg-light">
             <FormGroup>
-                <h3>Da Vinci Generator</h3>
+                <h3><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci Generator</a></h3>
             </FormGroup>
             <FormGroup>
                 <Label for="frequency">Frequency (1-10)</Label>
