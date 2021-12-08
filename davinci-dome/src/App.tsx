@@ -12,7 +12,7 @@ import {Button, Col, Container, Row} from "reactstrap"
 
 import "./App.css"
 import {daVinci, daVinciOutput, DaVinciResult, degreesToRadians} from "./DaVinci"
-import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
+import {DaVinciSpec, SpecDisplay, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
 import {BarBox, BoltCylinder} from "./Parts"
 import {Chirality, Scaffold} from "./Scaffold"
@@ -50,21 +50,9 @@ function App(): JSX.Element {
                 </div>
             ) : (
                 <>
-                    <div className="bottom-middle">
-                        <Container>
-                            <Row>
-                                <Col>
-                                    <Button onClick={() => setDaVinciResult(undefined)}>Change</Button>
-                                </Col>
-                                <Col>
-                                    <Button
-                                        onClick={() => saveCSVZip(daVinciOutput(daVinciResult.bars, daVinciResult.bolts, daVinciResult.joints))}>
-                                        Download
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Container>
-                    </div>
+                    <SpecDisplay spec={renderSpec}/>
+                    <Button className="bottom-left" onClick={() => setDaVinciResult(undefined)}>Change Parameters</Button>
+                    <Button className="bottom-right" onClick={() => saveCSVZip(daVinciOutput(daVinciResult))}>Download CSV</Button>
                     <Canvas className="Canvas">
                         <ambientLight intensity={0.05}/>
                         <mesh onDoubleClick={event => {

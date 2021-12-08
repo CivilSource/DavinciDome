@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2021. BURO Civiel, Rotterdam, Netherlands
  * Licensed under GNU GENERAL PUBLIC LICENSE Version 3.
@@ -17,6 +16,19 @@ export interface DaVinciSpec {
     barHeight: number
     barExtension: number
     boltExtension: number
+}
+
+export function SpecDisplay({spec}: { spec: DaVinciSpec }): JSX.Element {
+    return (
+        <div className="top-middle">
+            frequency={spec.frequency}&nbsp;
+            degrees={spec.degrees}&nbsp;
+            radius={spec.radius}&nbsp;
+            bar-area=({spec.barWidth}x{spec.barHeight})&nbsp;
+            bar-extend={spec.barExtension}&nbsp;
+            bolt-extend={spec.boltExtension}&nbsp;
+        </div>
+    )
 }
 
 export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec: DaVinciSpec) => void }): JSX.Element {

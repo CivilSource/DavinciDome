@@ -41,26 +41,26 @@ a {
     border-width: 1px;
 }
 
-.top-right {
+.top-middle {
+    color: white;
     position: absolute;
-    top: 0.5em;
-    right: 1em;
+    top: 1em;
+    left: 50%;
+    transform: translate(-50%, 0);
     z-index: 100;
-    padding: 2em;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 2em;
+    right: 2em;
+    z-index: 100;
 }
 
 .bottom-left {
     position: absolute;
-    bottom: 0.5em;
-    left: 1em;
-    z-index: 100;
-}
-
-.bottom-middle {
-    position: absolute;
-    bottom: 0.5em;
-    left: 50%;
-    transform: translate(-50%, 0);
+    bottom: 2em;
+    left: 2em;
     z-index: 100;
 }
 

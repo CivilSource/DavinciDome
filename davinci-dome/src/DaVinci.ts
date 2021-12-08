@@ -146,7 +146,7 @@ export function degreesToRadians(degree: number): number {
     return Math.PI * degree / 180
 }
 
-export function daVinciOutput(bars: Bar[], bolts: Bolt[], joints: Joint[]): DaVinciOutput {
+export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutput {
     const daVinciIntervals: DaVinciInterval [] = []
     bars.forEach((bar) => {
         daVinciIntervals.push({
