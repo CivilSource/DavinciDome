@@ -1,3 +1,9 @@
+
+/*
+ * Copyright (c) 2021. BURO Civiel, Rotterdam, Netherlands
+ * Licensed under GNU GENERAL PUBLIC LICENSE Version 3.
+ */
+
 import * as React from "react"
 import {useState} from "react"
 import {Button, Form, FormGroup, Input, Label} from "reactstrap"
@@ -55,7 +61,7 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
             handleSubmit()
         }} className="top-left bg-light">
             <FormGroup>
-                <h3><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci Generator</a></h3>
+                <h3><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci App</a></h3>
             </FormGroup>
             <FormGroup>
                 <Label for="frequency">Frequency (1-10)</Label>

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021. BURO Civiel, Rotterdam, Netherlands
+ * Licensed under GNU GENERAL PUBLIC LICENSE Version 3.
+ */
+
 import {OrbitControls, PerspectiveCamera} from "@react-three/drei"
 import {Canvas} from "@react-three/fiber"
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -49,12 +54,12 @@ function App(): JSX.Element {
             <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
             <Canvas className="Canvas">
                 <ambientLight intensity={0.05}/>
-                <mesh onClick={event => {
+                <mesh onDoubleClick={event => {
                     const face = event.face
                     if (!face) {
                         return
                     }
-                    const position = face.normal.multiplyScalar(renderSpec.radius * 3)
+                    const position = face.normal.multiplyScalar(event.camera.position.length())
                     event.camera.position.copy(position)
                 }}>
                     <boxGeometry args={[1, 1, 1]}/>

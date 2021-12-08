@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021. BURO Civiel, Rotterdam, Netherlands
+ * Licensed under GNU GENERAL PUBLIC LICENSE Version 3.
+ */
+
 import {Line3, Plane, Vector3} from "three"
 
 import {DaVinciInterval, DaVinciOutput} from "./Download"

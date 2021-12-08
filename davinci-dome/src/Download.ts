@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021. BURO Civiel, Rotterdam, Netherlands
+ * Licensed under GNU GENERAL PUBLIC LICENSE Version 3.
+ */
+
 import FileSaver from "file-saver"
 import JSZip from "jszip"
 
