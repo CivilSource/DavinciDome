@@ -19,6 +19,7 @@ a {
 .Canvas {
     background-color: #242434;
     min-height: 100vh;
+    min-width: 100vw;
 }
 
 .top-left {

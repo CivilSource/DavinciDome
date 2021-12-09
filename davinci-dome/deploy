@@ -1,0 +1,7 @@
+# build and deploy a new version
+
+rm -rf ../app/* build
+npm run build
+cp -r build/* ../app
+git status
+

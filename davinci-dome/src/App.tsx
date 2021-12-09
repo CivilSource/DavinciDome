@@ -29,11 +29,18 @@ const INITIAL_RENDER_SPEC: DaVinciSpec = {
 }
 const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
 
+
 function App(): JSX.Element {
+    const [size, setSize] = useState([window.innerWidth, window.innerHeight])
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
     const [scaffold, setScaffold] = useState<Scaffold>(new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)))
     const [daVinciResult, setDaVinciResult] = useState<DaVinciResult | undefined>(daVinci(scaffold, degreesToRadians(renderSpec.degrees)))
     const [version, setVersion] = useState(0)
+    useEffect(() => {
+        const checkSize = () => setSize([window.innerWidth, window.innerHeight])
+        window.addEventListener("resize", checkSize)
+        return () => window.removeEventListener("resize", checkSize)
+    }, [])
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
         const radians = Math.abs(degreesToRadians(degrees))
@@ -43,7 +50,7 @@ function App(): JSX.Element {
         setVersion(v => v + 1)
     }, [renderSpec])
     return (
-        <div className="App">
+        <div className="App" style={{width:size[0], height: size[1]}}>
             {!daVinciResult ? (
                 <div className="w-100 h-100">
                     <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
