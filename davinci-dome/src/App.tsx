@@ -33,8 +33,10 @@ const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Ri
 function App(): JSX.Element {
     const [size, setSize] = useState([window.innerWidth, window.innerHeight])
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
-    const [scaffold, setScaffold] = useState<Scaffold>(new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)))
-    const [daVinciResult, setDaVinciResult] = useState<DaVinciResult | undefined>(daVinci(scaffold, degreesToRadians(renderSpec.degrees)))
+    const [daVinciResult, setDaVinciResult] = useState<DaVinciResult>(daVinci(
+        new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)),
+        degreesToRadians(renderSpec.degrees),
+    ))
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const checkSize = () => setSize([window.innerWidth, window.innerHeight])
@@ -44,48 +46,38 @@ function App(): JSX.Element {
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
         const radians = Math.abs(degreesToRadians(degrees))
-        const freshScaffold = new Scaffold(frequency, radius, chiralityFromSpec(renderSpec))
-        setScaffold(freshScaffold)
-        setDaVinciResult(daVinci(freshScaffold, radians))
+        setDaVinciResult(daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians))
+        console.log("RENDER_SPEC", renderSpec.radius)
         setVersion(v => v + 1)
     }, [renderSpec])
     return (
-        <div className="App" style={{width:size[0], height: size[1]}}>
-            {!daVinciResult ? (
-                <div className="w-100 h-100">
-                    <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}/>
-                </div>
-            ) : (
-                <>
-                    <SpecDisplay spec={renderSpec}/>
-                    <Button className="bottom-left" onClick={() => setDaVinciResult(undefined)}>Change Parameters</Button>
-                    <Button className="bottom-right" onClick={() => saveCSVZip(daVinciOutput(daVinciResult))}>Download CSV</Button>
-                    <Canvas className="Canvas">
-                        <ambientLight intensity={0.05}/>
-                        <mesh onDoubleClick={event => {
-                            const face = event.face
-                            if (!face) {
-                                return
-                            }
-                            const position = face.normal.multiplyScalar(event.camera.position.length())
-                            event.camera.position.copy(position)
-                        }}>
-                            <boxGeometry args={[1, 1, 1]}/>
-                            <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
-                        </mesh>
-                        {daVinciResult.bars.map((bar, index) => (
-                            <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
-                        ))}
-                        {daVinciResult.bolts.map((bolt, index) => (
-                            <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
-                        ))}
-                        <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
-                            <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
-                        </PerspectiveCamera>
-                        <OrbitControls/>
-                    </Canvas>
-                </>
-            )}
+        <div className="App" style={{width: size[0], height: size[1]}}>
+            <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}
+                        saveCSV={() => saveCSVZip(daVinciOutput(daVinciResult))}/>
+            <Canvas className="canvas">
+                <ambientLight intensity={0.05}/>
+                <mesh onDoubleClick={event => {
+                    const face = event.face
+                    if (!face) {
+                        return
+                    }
+                    const position = face.normal.multiplyScalar(event.camera.position.length())
+                    event.camera.position.copy(position)
+                }}>
+                    <boxGeometry args={[1, 1, 1]}/>
+                    <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
+                </mesh>
+                {daVinciResult.bars.map((bar, index) => (
+                    <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
+                ))}
+                {daVinciResult.bolts.map((bolt, index) => (
+                    <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
+                ))}
+                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
+                    <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
+                </PerspectiveCamera>
+                <OrbitControls/>
+            </Canvas>
         </div>
     )
 }

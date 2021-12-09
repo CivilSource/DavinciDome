@@ -10,58 +10,39 @@ html {
 
 a {
     color: darkorange;
+    font-size: large;
 }
 
 .App {
-    min-height: 90vh;
-}
-
-.Canvas {
-    background-color: #242434;
     min-height: 100vh;
     min-width: 100vw;
+    display: flex;
+    flex-direction: row;
+}
+
+.canvas {
+    background-color: #242434;
+}
+
+.spec-editor {
+    float: left;
+    font-size: small;
+    font-weight: bold;
+    color: white;
+    width: 13em;
+    padding: 1em;
+    background-color: #3b3b3b;
+    border-right-style: solid;
+    border-right-color: #198754;
+}
+
+.form-control {
+    font-size: small;
 }
 
 .top-left {
     position: absolute;
-    top: 0.5em;
-    left: 1em;
-    z-index: 100;
-}
-
-.spec-editor {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    text-align: center;
-    width: 50em;
-    padding: 1em;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-}
-
-.top-middle {
-    color: white;
-    position: absolute;
     top: 1em;
-    left: 50%;
-    transform: translate(-50%, 0);
+    left: 15em;
     z-index: 100;
 }
-
-.bottom-right {
-    position: absolute;
-    bottom: 2em;
-    right: 2em;
-    z-index: 100;
-}
-
-.bottom-left {
-    position: absolute;
-    bottom: 2em;
-    left: 2em;
-    z-index: 100;
-}
-

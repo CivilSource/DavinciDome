@@ -5,7 +5,9 @@
 
 import * as React from "react"
 import {useState} from "react"
-import {Button, Col, Container, Form, FormGroup, Input, Label, Row} from "reactstrap"
+import {Button, Form, FormGroup, Input, Label} from "reactstrap"
+
+const MILLIS = 1000
 
 export interface DaVinciSpec {
     frequency: number
@@ -31,26 +33,30 @@ export function SpecDisplay({spec}: { spec: DaVinciSpec }): JSX.Element {
     )
 }
 
-export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec: DaVinciSpec) => void }): JSX.Element {
+export function SpecEditor({spec, setSpec, saveCSV}: {
+    spec: DaVinciSpec,
+    setSpec: (spec: DaVinciSpec) => void,
+    saveCSV: () => void,
+}): JSX.Element {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
     const [radius, setRadius] = useState(spec.radius.toString())
-    const [boltWidth, setBoltWidth] = useState(spec.boltWidth.toString())
-    const [barWidth, setBarWidth] = useState(spec.barWidth.toString())
-    const [barHeight, setBarHeight] = useState(spec.barHeight.toString())
-    const [barExtension, setBarExtension] = useState(spec.barExtension.toString())
-    const [boltExtension, setBoltExtension] = useState(spec.boltExtension.toString())
+    const [boltWidth, setBoltWidth] = useState((spec.boltWidth * MILLIS).toString())
+    const [barWidth, setBarWidth] = useState((spec.barWidth * MILLIS).toString())
+    const [barHeight, setBarHeight] = useState((spec.barHeight * MILLIS).toString())
+    const [barExtension, setBarExtension] = useState((spec.barExtension * MILLIS).toString())
+    const [boltExtension, setBoltExtension] = useState((spec.boltExtension * MILLIS).toString())
 
     function handleSubmit(): void {
         const daVinciSpec: DaVinciSpec = {
             frequency: parseInt(frequency, 10),
             degrees: parseFloat(degrees),
             radius: parseFloat(radius),
-            boltWidth: parseFloat(boltWidth),
-            barWidth: parseFloat(barWidth),
-            barHeight: parseFloat(barHeight),
-            barExtension: parseFloat(barExtension),
-            boltExtension: parseFloat(boltExtension),
+            boltWidth: parseFloat(boltWidth) / MILLIS,
+            barWidth: parseFloat(barWidth) / MILLIS,
+            barHeight: parseFloat(barHeight) / MILLIS,
+            barExtension: parseFloat(barExtension) / MILLIS,
+            boltExtension: parseFloat(boltExtension) / MILLIS,
         }
         if (!(!isFrequencyValid(frequency) || isNaN(daVinciSpec.degrees) || isNaN(daVinciSpec.radius) ||
             isNaN(daVinciSpec.boltWidth) || isNaN(daVinciSpec.barWidth) || isNaN(daVinciSpec.barHeight)
@@ -71,101 +77,76 @@ export function SpecEditor({spec, setSpec}: { spec: DaVinciSpec, setSpec: (spec:
         <Form onSubmit={event => {
             event.preventDefault()
             handleSubmit()
-        }} className="bg-light spec-editor">
-            <FormGroup className="align-content-center w-100">
-                <h3><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci Dome</a></h3>
-            </FormGroup>
-            <hr/>
-            <Container>
-                <Row>
-                    <Col>
-                        <FormGroup>
-                            <Label for="frequency">Frequency (1-10)</Label>
-                            <Input id="frequency"
-                                   value={frequency}
-                                   valid={isFrequencyValid(frequency)}
-                                   invalid={!isFrequencyValid(frequency)}
-                                   onChange={({target}) => setFrequency(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="degrees">Degrees</Label>
-                            <Input id="degrees"
-                                   value={degrees}
-                                   valid={!isNaN(parseFloat(degrees))}
-                                   invalid={isNaN(parseFloat(degrees))}
-                                   onChange={({target}) => setDegrees(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="radius">Radius</Label>
-                            <Input id="radius"
-                                   value={radius}
-                                   valid={!isNaN(parseFloat(radius))}
-                                   invalid={isNaN(parseFloat(radius))}
-                                   onChange={({target}) => setRadius(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="boltWidth">Bolt Width</Label>
-                            <Input id="boltWidth"
-                                   value={boltWidth}
-                                   valid={!isNaN(parseFloat(boltWidth))}
-                                   invalid={isNaN(parseFloat(boltWidth))}
-                                   onChange={({target}) => setBoltWidth(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <FormGroup>
-                            <Label for="barWidth">Bar Width</Label>
-                            <Input id="barWidth"
-                                   value={barWidth}
-                                   valid={!isNaN(parseFloat(barWidth))}
-                                   invalid={isNaN(parseFloat(barWidth))}
-                                   onChange={({target}) => setBarWidth(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="barHeight">Bar Height</Label>
-                            <Input id="barHeight"
-                                   value={barHeight}
-                                   valid={!isNaN(parseFloat(barHeight))}
-                                   invalid={isNaN(parseFloat(barHeight))}
-                                   onChange={({target}) => setBarHeight(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="boltExtension">Bolt Extension</Label>
-                            <Input id="boltExtension"
-                                   value={boltExtension}
-                                   valid={!isNaN(parseFloat(boltExtension))}
-                                   invalid={isNaN(parseFloat(boltExtension))}
-                                   onChange={({target}) => setBoltExtension(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label for="barExtension">Bar Extension</Label>
-                            <Input id="barExtension"
-                                   value={barExtension}
-                                   valid={!isNaN(parseFloat(barExtension))}
-                                   invalid={isNaN(parseFloat(barExtension))}
-                                   onChange={({target}) => setBarExtension(target.value)}/>
-                        </FormGroup>
-                    </Col>
-                </Row>
-            </Container>
+        }} className="spec-editor">
+            <h3 className="w-100 text-center"><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci Dome</a></h3>
             <hr/>
             <FormGroup>
-                <Button className="w-100" type="submit">Generate</Button>
+                <Label for="frequency">Frequency [1..10]</Label>
+                <Input id="frequency"
+                       value={frequency}
+                       valid={isFrequencyValid(frequency)}
+                       invalid={!isFrequencyValid(frequency)}
+                       onChange={({target}) => setFrequency(target.value)}/>
             </FormGroup>
+            <FormGroup>
+                <Label for="degrees">Rotation [deg]</Label>
+                <Input id="degrees"
+                       value={degrees}
+                       valid={!isNaN(parseFloat(degrees))}
+                       invalid={isNaN(parseFloat(degrees))}
+                       onChange={({target}) => setDegrees(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="radius">Radius [m]</Label>
+                <Input id="radius"
+                       value={radius}
+                       valid={!isNaN(parseFloat(radius))}
+                       invalid={isNaN(parseFloat(radius))}
+                       onChange={({target}) => setRadius(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="boltWidth">Bolt Diam [mm]</Label>
+                <Input id="boltWidth"
+                       value={boltWidth}
+                       valid={!isNaN(parseFloat(boltWidth))}
+                       invalid={isNaN(parseFloat(boltWidth))}
+                       onChange={({target}) => setBoltWidth(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="barWidth">Bar Width [mm]</Label>
+                <Input id="barWidth"
+                       value={barWidth}
+                       valid={!isNaN(parseFloat(barWidth))}
+                       invalid={isNaN(parseFloat(barWidth))}
+                       onChange={({target}) => setBarWidth(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="barHeight">Bar Height [mm]</Label>
+                <Input id="barHeight"
+                       value={barHeight}
+                       valid={!isNaN(parseFloat(barHeight))}
+                       invalid={isNaN(parseFloat(barHeight))}
+                       onChange={({target}) => setBarHeight(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="boltExtension">Bolt Extra [mm]</Label>
+                <Input id="boltExtension"
+                       value={boltExtension}
+                       valid={!isNaN(parseFloat(boltExtension))}
+                       invalid={isNaN(parseFloat(boltExtension))}
+                       onChange={({target}) => setBoltExtension(target.value)}/>
+            </FormGroup>
+            <FormGroup>
+                <Label for="barExtension">Bar Extra [mm]</Label>
+                <Input id="barExtension"
+                       value={barExtension}
+                       valid={!isNaN(parseFloat(barExtension))}
+                       invalid={isNaN(parseFloat(barExtension))}
+                       onChange={({target}) => setBarExtension(target.value)}/>
+            </FormGroup>
+            <hr/>
+            <Button color="success" className="w-100 my-1" type="submit">Regenerate</Button>
+            <Button color="info" className="w-100" onClick={saveCSV}>Download</Button>
         </Form>
     )
 }
