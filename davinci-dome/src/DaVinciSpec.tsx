@@ -58,7 +58,7 @@ export function SpecEditor({spec, setSpec, saveCSV}: {
             barExtension: parseFloat(barExtension) / MILLIS,
             boltExtension: parseFloat(boltExtension) / MILLIS,
         }
-        if (!(!isFrequencyValid(frequency) || isNaN(daVinciSpec.degrees) || isNaN(daVinciSpec.radius) ||
+        if (!(!isFrequencyValid(frequency) || !isDegreesValid(degrees) || isNaN(daVinciSpec.radius) ||
             isNaN(daVinciSpec.boltWidth) || isNaN(daVinciSpec.barWidth) || isNaN(daVinciSpec.barHeight)
             || isNaN(daVinciSpec.barExtension) || isNaN(daVinciSpec.boltExtension))) {
             setSpec(daVinciSpec)
@@ -73,12 +73,21 @@ export function SpecEditor({spec, setSpec, saveCSV}: {
         return f <= 10 && f > 0
     }
 
+    function isDegreesValid(value: string): boolean {
+        const f = parseInt(value, 10)
+        if (isNaN(f)) {
+            return false
+        }
+        return f <= 90 && f >= -90
+    }
+
     return (
         <Form onSubmit={event => {
             event.preventDefault()
             handleSubmit()
         }} className="spec-editor">
-            <h3 className="w-100 text-center"><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da Vinci Dome</a></h3>
+            <h3 className="w-100 text-center"><a target="_BLANK" href="https://github.com/CivilSource/DavinciDome">Da
+                Vinci Dome</a></h3>
             <hr/>
             <FormGroup>
                 <Label for="frequency">Frequency [1..10]</Label>
@@ -92,8 +101,8 @@ export function SpecEditor({spec, setSpec, saveCSV}: {
                 <Label for="degrees">Rotation [deg]</Label>
                 <Input id="degrees"
                        value={degrees}
-                       valid={!isNaN(parseFloat(degrees))}
-                       invalid={isNaN(parseFloat(degrees))}
+                       valid={isDegreesValid(degrees)}
+                       invalid={!isDegreesValid(degrees)}
                        onChange={({target}) => setDegrees(target.value)}/>
             </FormGroup>
             <FormGroup>
