@@ -8,11 +8,11 @@ import {Canvas} from "@react-three/fiber"
 import "bootstrap/dist/css/bootstrap.min.css"
 import * as React from "react"
 import {useEffect, useState} from "react"
-import {Button, Col, Container, Row} from "reactstrap"
+import {Euler, Vector3} from "three"
 
 import "./App.css"
 import {daVinci, daVinciOutput, DaVinciResult, degreesToRadians} from "./DaVinci"
-import {DaVinciSpec, SpecDisplay, SpecEditor} from "./DaVinciSpec"
+import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
 import {BarBox, BoltCylinder} from "./Parts"
 import {Chirality, Scaffold} from "./Scaffold"
@@ -66,6 +66,10 @@ function App(): JSX.Element {
                 }}>
                     <boxGeometry args={[1, 1, 1]}/>
                     <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
+                </mesh>
+                <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0,-1.1 * renderSpec.radius,0)} >
+                    <circleGeometry args={[1.5 * renderSpec.radius, 120]}/>
+                    <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
                 {daVinciResult.bars.map((bar, index) => (
                     <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
