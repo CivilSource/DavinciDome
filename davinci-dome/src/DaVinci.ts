@@ -185,7 +185,7 @@ export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutp
             })
         })
     bolts
-        .filter(bolt => bolt.jointA.position === JointPosition.Above || bolt.jointB.position === JointPosition.Above)
+        .filter(bolt => bolt.jointA.position === JointPosition.Above && bolt.jointB.position === JointPosition.Above)
         .forEach((bolt) => {
             daVinciIntervals.push({
                 nodeIndexes: [bolt.jointA.index, bolt.jointB.index],
