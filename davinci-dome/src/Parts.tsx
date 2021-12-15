@@ -17,7 +17,7 @@ export function Ball({position, radius}: {
     return (
         <mesh position={position}>
             <sphereGeometry args={[radius, 32, 16]}/>
-            <meshPhongMaterial color="green"/>
+            <meshPhongMaterial color="red"/>
         </mesh>
     )
 }

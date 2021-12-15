@@ -11,10 +11,10 @@ import {useEffect, useState} from "react"
 import {Euler, Vector3} from "three"
 
 import "./App.css"
-import {daVinci, daVinciOutput, DaVinciResult, degreesToRadians} from "./DaVinci"
+import {daVinci, daVinciOutput, DaVinciResult, daVinciToDome, degreesToRadians, JointPosition} from "./DaVinci"
 import {DaVinciSpec, SpecEditor} from "./DaVinciSpec"
 import {saveCSVZip} from "./Download"
-import {BarBox, BoltCylinder} from "./Parts"
+import {Ball, BarBox, BoltCylinder} from "./Parts"
 import {Chirality, Scaffold} from "./Scaffold"
 
 const INITIAL_RENDER_SPEC: DaVinciSpec = {
@@ -53,7 +53,9 @@ function App(): JSX.Element {
     return (
         <div className="App" style={{width: size[0], height: size[1]}}>
             <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}
-                        saveCSV={() => saveCSVZip(daVinciOutput(daVinciResult))}/>
+                        saveCSV={() => saveCSVZip(daVinciOutput(daVinciResult))}
+                        toDome={() => setDaVinciResult(daVinciToDome(daVinciResult, 0))}
+            />
             <Canvas className="canvas">
                 <ambientLight intensity={0.05}/>
                 <mesh onDoubleClick={event => {
@@ -67,7 +69,7 @@ function App(): JSX.Element {
                     <boxGeometry args={[1, 1, 1]}/>
                     <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
                 </mesh>
-                <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0,-1.1 * renderSpec.radius,0)} >
+                <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0, -0.5 * renderSpec.radius, 0)}>
                     <circleGeometry args={[1.5 * renderSpec.radius, 120]}/>
                     <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
@@ -76,6 +78,9 @@ function App(): JSX.Element {
                 ))}
                 {daVinciResult.bolts.map((bolt, index) => (
                     <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
+                ))}
+                {daVinciResult.joints.filter(joint => joint.position === JointPosition.OnSurface).map((joint, index) => (
+                    <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={1}/>
                 ))}
                 <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
                     <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>

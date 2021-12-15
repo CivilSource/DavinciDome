@@ -33,10 +33,11 @@ export function SpecDisplay({spec}: { spec: DaVinciSpec }): JSX.Element {
     )
 }
 
-export function SpecEditor({spec, setSpec, saveCSV}: {
+export function SpecEditor({spec, setSpec, saveCSV, toDome}: {
     spec: DaVinciSpec,
     setSpec: (spec: DaVinciSpec) => void,
     saveCSV: () => void,
+    toDome: () => void,
 }): JSX.Element {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
@@ -156,6 +157,7 @@ export function SpecEditor({spec, setSpec, saveCSV}: {
             <hr/>
             <Button color="success" className="w-100 my-1" type="submit">Regenerate</Button>
             <Button color="info" className="w-100" onClick={saveCSV}>Download</Button>
+            <Button color="warning" className="w-100" onClick={toDome}>toDome</Button>
         </Form>
     )
 }

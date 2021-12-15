@@ -8,9 +8,14 @@ import {Line3, Plane, Vector3} from "three"
 import {DaVinciInterval, DaVinciOutput} from "./Download"
 import {Chirality, Scaffold, Vertex} from "./Scaffold"
 
+export enum JointPosition {
+    Above, Below, OnSurface,
+}
+
 export interface Joint {
     index: number
     point: Vector3
+    position: JointPosition
 }
 
 export interface Bar {
@@ -19,6 +24,7 @@ export interface Bar {
     jointB: Joint
     jointC: Joint
     jointD: Joint
+    planeJoint?: Joint
     vertexA: Vertex
     vertexB: Vertex
 }
@@ -48,12 +54,12 @@ function barName(vertexA: Vertex, vertexB: Vertex): string {
 export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaVinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
     const joints: Joint[] = []
-    const rotationAngle = rotate ? Math.atan(1/1.61803398875) : 0
+    const rotationAngle = rotate ? Math.atan(1 / 1.61803398875) : 0
     const rotationAxis = new Vector3(1, 0, 0)
 
     function freshJoint(point: Vector3): Joint {
         const index = joints.length
-        const node: Joint = {index, point}
+        const node: Joint = {index, point, position: JointPosition.Above}
         joints.push(node)
         return node
     }
@@ -136,6 +142,27 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
             const bolt: Bolt = {jointA: nodeA, jointB: nodeB, index: bars.length + bolts.length}
             bolts.push(bolt)
         })
+    })
+    return {bars, bolts, joints}
+}
+
+export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaVinciResult {
+    const joints = [...result.joints]
+    const bars = [...result.bars]
+    const bolts = [...result.bolts]
+    const plane = new Plane(new Vector3(0, 1, 0), surfaceHeight)
+    joints.forEach(joint => {
+        const distance = plane.distanceToPoint(joint.point)
+        joint.position = distance >= 0 ? JointPosition.Above : JointPosition.Below
+    })
+    bars.forEach(bar => {
+        const line = new Line3(bar.jointA.point, bar.jointD.point)
+        const point = plane.intersectLine(line, new Vector3())
+        if (point) {
+            const planeJoint : Joint = {point, index: joints.length, position: JointPosition.OnSurface}
+            bar.planeJoint = planeJoint
+            joints.push(planeJoint)
+        }
     })
     return {bars, bolts, joints}
 }
