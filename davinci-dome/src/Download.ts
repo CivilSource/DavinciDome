@@ -23,7 +23,7 @@ function extractNodeFile(output: DaVinciOutput): string {
     rows.push(["index", "x", "y", "z"])
     output.joints.forEach((joint, index) => rows.push([
         (index + 1).toFixed(0),
-        csvNumber(joint.point.x), csvNumber(joint.point.y), csvNumber(joint.point.z),
+        csvNumber(joint.point.x), csvNumber(joint.point.z), csvNumber(joint.point.y),
     ]))
     return rows.map(row => row.join(";")).join("\n")
 }
