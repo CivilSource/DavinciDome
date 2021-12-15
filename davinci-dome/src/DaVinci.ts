@@ -157,7 +157,11 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
             const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
-            bar.joints.push(planeJoint)
+            if (bar.joints[0].position === JointPosition.Below) {
+                bar.joints = [planeJoint, ...bar.joints]
+            } else {
+                bar.joints = [...bar.joints, planeJoint]
+            }
             joints.push(planeJoint)
             return sawBar(bar)
         } else {

@@ -75,7 +75,7 @@ function App(): JSX.Element {
                     <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
                 {daVinciResult.bars
-                    .filter(bar => bar.joints[0].position !== JointPosition.Below || bar.joints[bar.joints.length - 1].position !== JointPosition.Below)
+                    .filter(bar => !(bar.joints[0].position === JointPosition.Below || bar.joints[bar.joints.length - 1].position === JointPosition.Below))
                     .map((bar, index) => (
                         <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
                     ))}
