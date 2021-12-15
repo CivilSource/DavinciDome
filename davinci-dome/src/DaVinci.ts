@@ -86,10 +86,10 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
         const hub: Hub = {adjacentBars}
         return hub
     })
-    bars.forEach(({joints}) => {
-        const axis = new Vector3().lerpVectors(joints[0].point, joints[3].point, 0.5).normalize()
-        joints[0].point.applyAxisAngle(axis, twist)
-        joints[3].point.applyAxisAngle(axis, twist)
+    bars.forEach(bar => {
+        const axis = new Vector3().lerpVectors(bar.joints[0].point, bar.joints[3].point, 0.5).normalize()
+        bar.joints[0].point.applyAxisAngle(axis, twist)
+        bar.joints[3].point.applyAxisAngle(axis, twist)
     })
 
     function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean): Joint {
@@ -146,20 +146,22 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
 
 export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaVinciResult {
     const joints = [...result.joints]
-    const bars = [...result.bars]
     const bolts = [...result.bolts]
     const plane = new Plane(new Vector3(0, -1, 0), surfaceHeight)
     joints.forEach(joint => {
         const distance = plane.distanceToPoint(joint.point)
         joint.position = distance <= 0 ? JointPosition.Above : JointPosition.Below
     })
-    bars.forEach(bar => {
+    const bars = result.bars.map(bar => {
         const line = new Line3(bar.joints[0].point, bar.joints[3].point)
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
             const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
             bar.joints.push(planeJoint)
             joints.push(planeJoint)
+            return sawBar(bar)
+        } else {
+            return bar
         }
     })
     return {bars, bolts, joints}
@@ -192,4 +194,11 @@ export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutp
             })
         })
     return {joints, daVinciIntervals}
+}
+
+function sawBar(bar: Bar): Bar {
+    if (bar.joints.length === 4) {
+        return bar
+    }
+    return {...bar, joints: bar.joints.filter(b => b.position !== JointPosition.Below)}
 }

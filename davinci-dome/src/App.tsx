@@ -75,15 +75,15 @@ function App(): JSX.Element {
                     <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
                 {daVinciResult.bars
-                    .filter(bar => bar.joints[0].position === JointPosition.Above || bar.joints[3].position === JointPosition.Above)
+                    .filter(bar => bar.joints[0].position !== JointPosition.Below || bar.joints[bar.joints.length - 1].position !== JointPosition.Below)
                     .map((bar, index) => (
                         <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
                     ))}
                 {daVinciResult.bolts
                     .filter(bolt => bolt.jointA.position === JointPosition.Above || bolt.jointB.position === JointPosition.Above)
                     .map((bolt, index) => (
-                    <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
-                ))}
+                        <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
+                    ))}
                 {daVinciResult.joints.filter(joint => joint.position === JointPosition.OnSurface).map((joint, index) => (
                     <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={renderSpec.radius / 50}/>
                 ))}
