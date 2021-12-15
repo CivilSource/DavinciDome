@@ -177,7 +177,7 @@ export function degreesToRadians(degree: number): number {
 export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutput {
     const daVinciIntervals: DaVinciInterval [] = []
     bars
-        .filter(bar => bar.joints[0].position === JointPosition.Above || bar.joints[3].position === JointPosition.Above)
+        .filter(bar => bar.joints[0].position === JointPosition.Above || bar.joints[bar.joints.length - 1].position === JointPosition.Above)
         .forEach((bar) => {
             daVinciIntervals.push({
                 nodeIndexes: bar.joints.map(j => j.index),
