@@ -45,9 +45,11 @@ function barName(vertexA: Vertex, vertexB: Vertex): string {
     return `${min},${max}`
 }
 
-export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
+export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaVinciResult {
     const twist = angle * (scaffold.chirality === Chirality.Left ? 1 : -1)
     const joints: Joint[] = []
+    const rotationAngle = rotate ? Math.atan(1/1.61803398875) : 0
+    const rotationAxis = new Vector3(1, 0, 0)
 
     function freshJoint(point: Vector3): Joint {
         const index = joints.length
@@ -64,10 +66,10 @@ export function daVinci(scaffold: Scaffold, angle: number): DaVinciResult {
                 return
             }
             const index = bars.length
-            const jointA = freshJoint(new Vector3().copy(vertex.location))
+            const jointA = freshJoint(new Vector3().copy(vertex.location).applyAxisAngle(rotationAxis, rotationAngle))
             const jointB = freshJoint(new Vector3())
             const jointC = freshJoint(new Vector3())
-            const jointD = freshJoint(new Vector3().copy(adjacentVertex.location))
+            const jointD = freshJoint(new Vector3().copy(adjacentVertex.location).applyAxisAngle(rotationAxis, rotationAngle))
             const vertexA = vertex
             const vertexB = adjacentVertex
             const bar: Bar = {index, jointA, jointD, jointB, jointC, vertexA, vertexB}

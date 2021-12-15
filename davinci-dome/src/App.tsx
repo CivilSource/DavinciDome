@@ -35,7 +35,7 @@ function App(): JSX.Element {
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
     const [daVinciResult, setDaVinciResult] = useState<DaVinciResult>(daVinci(
         new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)),
-        degreesToRadians(renderSpec.degrees),
+        degreesToRadians(renderSpec.degrees), true,
     ))
     const [version, setVersion] = useState(0)
     useEffect(() => {
@@ -46,7 +46,7 @@ function App(): JSX.Element {
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
         const radians = Math.abs(degreesToRadians(degrees))
-        setDaVinciResult(daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians))
+        setDaVinciResult(daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians, true))
         console.log("RENDER_SPEC", renderSpec.radius)
         setVersion(v => v + 1)
     }, [renderSpec])
