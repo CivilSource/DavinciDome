@@ -157,13 +157,8 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
             const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
-            if (bar.joints[0].position === JointPosition.Below) {
-                bar.joints = [planeJoint, ...bar.joints]
-            } else {
-                bar.joints = [...bar.joints, planeJoint]
-            }
             joints.push(planeJoint)
-            return sawBar(bar)
+            return sawBar(bar, planeJoint)
         } else {
             return bar
         }
@@ -200,9 +195,8 @@ export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutp
     return {joints, daVinciIntervals}
 }
 
-function sawBar(bar: Bar): Bar {
-    if (bar.joints.length === 4) {
-        return bar
-    }
-    return {...bar, joints: bar.joints.filter(b => b.position !== JointPosition.Below)}
+function sawBar(bar: Bar, planeJoint: Joint): Bar {
+    const allJoints = (bar.joints[0].position === JointPosition.Below) ? [planeJoint, ...bar.joints] : [...bar.joints, planeJoint]
+    const joints = allJoints.filter(b => b.position !== JointPosition.Below)
+    return {...bar, joints}
 }
