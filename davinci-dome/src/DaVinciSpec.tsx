@@ -18,26 +18,13 @@ export interface DaVinciSpec {
     barHeight: number
     barExtension: number
     boltExtension: number
+    planeHeight: number
 }
 
-export function SpecDisplay({spec}: { spec: DaVinciSpec }): JSX.Element {
-    return (
-        <div className="top-middle">
-            frequency={spec.frequency}&nbsp;
-            degrees={spec.degrees}&nbsp;
-            radius={spec.radius}&nbsp;
-            bar-area=({spec.barWidth}x{spec.barHeight})&nbsp;
-            bar-extend={spec.barExtension}&nbsp;
-            bolt-extend={spec.boltExtension}&nbsp;
-        </div>
-    )
-}
-
-export function SpecEditor({spec, setSpec, saveCSV, toDome}: {
+export function SpecEditor({spec, setSpec, saveCSV}: {
     spec: DaVinciSpec,
     setSpec: (spec: DaVinciSpec) => void,
     saveCSV: () => void,
-    toDome: () => void,
 }): JSX.Element {
     const [frequency, setFrequency] = useState(spec.frequency.toString())
     const [degrees, setDegrees] = useState(spec.degrees.toString())
@@ -47,6 +34,7 @@ export function SpecEditor({spec, setSpec, saveCSV, toDome}: {
     const [barHeight, setBarHeight] = useState((spec.barHeight * MILLIS).toString())
     const [barExtension, setBarExtension] = useState((spec.barExtension * MILLIS).toString())
     const [boltExtension, setBoltExtension] = useState((spec.boltExtension * MILLIS).toString())
+    const [planeHeight, setPlaneHeight] = useState((spec.planeHeight).toString())
 
     function handleSubmit(): void {
         const daVinciSpec: DaVinciSpec = {
@@ -58,10 +46,11 @@ export function SpecEditor({spec, setSpec, saveCSV, toDome}: {
             barHeight: parseFloat(barHeight) / MILLIS,
             barExtension: parseFloat(barExtension) / MILLIS,
             boltExtension: parseFloat(boltExtension) / MILLIS,
+            planeHeight: parseFloat(planeHeight),
         }
         if (!(!isFrequencyValid(frequency) || !isDegreesValid(degrees) || isNaN(daVinciSpec.radius) ||
             isNaN(daVinciSpec.boltWidth) || isNaN(daVinciSpec.barWidth) || isNaN(daVinciSpec.barHeight)
-            || isNaN(daVinciSpec.barExtension) || isNaN(daVinciSpec.boltExtension))) {
+            || isNaN(daVinciSpec.barExtension) || isNaN(daVinciSpec.boltExtension) || isNaN(daVinciSpec.planeHeight))) {
             setSpec(daVinciSpec)
         }
     }
@@ -154,10 +143,17 @@ export function SpecEditor({spec, setSpec, saveCSV, toDome}: {
                        invalid={isNaN(parseFloat(barExtension))}
                        onChange={({target}) => setBarExtension(target.value)}/>
             </FormGroup>
+            <FormGroup>
+                <Label for="planeHeight">Plane Height [m]</Label>
+                <Input id="planeHeight"
+                       value={planeHeight}
+                       valid={!isNaN(parseFloat(planeHeight))}
+                       invalid={isNaN(parseFloat(planeHeight))}
+                       onChange={({target}) => setPlaneHeight(target.value)}/>
+            </FormGroup>
             <hr/>
             <Button color="success" className="w-100 my-1" type="submit">Regenerate</Button>
             <Button color="info" className="w-100" onClick={saveCSV}>Download</Button>
-            <Button color="warning" className="w-100" onClick={toDome}>toDome</Button>
         </Form>
     )
 }

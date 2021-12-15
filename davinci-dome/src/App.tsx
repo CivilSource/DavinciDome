@@ -26,6 +26,7 @@ const INITIAL_RENDER_SPEC: DaVinciSpec = {
     barHeight: 0.02,
     barExtension: 0.3,
     boltExtension: 0.2,
+    planeHeight: 0,
 }
 const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Right : Chirality.Left
 
@@ -33,10 +34,10 @@ const chiralityFromSpec = ({degrees}: DaVinciSpec) => degrees > 0 ? Chirality.Ri
 function App(): JSX.Element {
     const [size, setSize] = useState([window.innerWidth, window.innerHeight])
     const [renderSpec, setRenderSpec] = useState(INITIAL_RENDER_SPEC)
-    const [daVinciResult, setDaVinciResult] = useState<DaVinciResult>(daVinci(
+    const [daVinciResult, setDaVinciResult] = useState<DaVinciResult>(daVinciToDome(daVinci(
         new Scaffold(renderSpec.frequency, renderSpec.radius, chiralityFromSpec(renderSpec)),
         degreesToRadians(renderSpec.degrees), true,
-    ))
+    ), renderSpec.planeHeight))
     const [version, setVersion] = useState(0)
     useEffect(() => {
         const checkSize = () => setSize([window.innerWidth, window.innerHeight])
@@ -46,7 +47,8 @@ function App(): JSX.Element {
     useEffect(() => {
         const {frequency, radius, degrees} = renderSpec
         const radians = Math.abs(degreesToRadians(degrees))
-        setDaVinciResult(daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians, true))
+        const result = daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians, true)
+        setDaVinciResult(daVinciToDome(result, renderSpec.planeHeight))
         console.log("RENDER_SPEC", renderSpec.radius)
         setVersion(v => v + 1)
     }, [renderSpec])
@@ -54,7 +56,6 @@ function App(): JSX.Element {
         <div className="App" style={{width: size[0], height: size[1]}}>
             <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}
                         saveCSV={() => saveCSVZip(daVinciOutput(daVinciResult))}
-                        toDome={() => setDaVinciResult(daVinciToDome(daVinciResult, 0))}
             />
             <Canvas className="canvas">
                 <ambientLight intensity={0.05}/>
@@ -69,22 +70,25 @@ function App(): JSX.Element {
                     <boxGeometry args={[1, 1, 1]}/>
                     <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
                 </mesh>
-                <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0, -0.5 * renderSpec.radius, 0)}>
+                <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0, renderSpec.planeHeight, 0)}>
                     <circleGeometry args={[1.5 * renderSpec.radius, 120]}/>
                     <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
-                {daVinciResult.bars.map((bar, index) => (
-                    <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
-                ))}
-                {daVinciResult.bolts.map((bolt, index) => (
+                {daVinciResult.bars
+                    .filter(bar => bar.jointA.position === JointPosition.Above || bar.jointD.position === JointPosition.Above)
+                    .map((bar, index) => (
+                        <BarBox key={`bar-${version}-#${index}`} bar={bar} renderSpec={renderSpec}/>
+                    ))}
+                {daVinciResult.bolts
+                    .filter(bolt => bolt.jointA.position === JointPosition.Above || bolt.jointB.position === JointPosition.Above)
+                    .map((bolt, index) => (
                     <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
                 ))}
                 {daVinciResult.joints.filter(joint => joint.position === JointPosition.OnSurface).map((joint, index) => (
-                    <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={1}/>
+                    <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={renderSpec.radius / 50}/>
                 ))}
-                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}>
-                    <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
-                </PerspectiveCamera>
+                <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
+                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}/>
                 <OrbitControls/>
             </Canvas>
         </div>

@@ -150,10 +150,10 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
     const joints = [...result.joints]
     const bars = [...result.bars]
     const bolts = [...result.bolts]
-    const plane = new Plane(new Vector3(0, 1, 0), surfaceHeight)
+    const plane = new Plane(new Vector3(0, -1, 0), surfaceHeight)
     joints.forEach(joint => {
         const distance = plane.distanceToPoint(joint.point)
-        joint.position = distance >= 0 ? JointPosition.Above : JointPosition.Below
+        joint.position = distance <= 0 ? JointPosition.Above : JointPosition.Below
     })
     bars.forEach(bar => {
         const line = new Line3(bar.jointA.point, bar.jointD.point)
