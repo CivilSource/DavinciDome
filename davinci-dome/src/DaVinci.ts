@@ -159,7 +159,7 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
         const line = new Line3(bar.jointA.point, bar.jointD.point)
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
-            const planeJoint : Joint = {point, index: joints.length, position: JointPosition.OnSurface}
+            const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
             bar.planeJoint = planeJoint
             joints.push(planeJoint)
         }
@@ -177,13 +177,17 @@ export function degreesToRadians(degree: number): number {
 
 export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutput {
     const daVinciIntervals: DaVinciInterval [] = []
-    bars.forEach((bar) => {
-        daVinciIntervals.push({
-            nodeIndexes: [bar.jointA.index, bar.jointB.index, bar.jointC.index, bar.jointD.index],
-            type: "type 1",
+    bars
+        .filter(bar => bar.jointA.position === JointPosition.Above || bar.jointD.position === JointPosition.Above)
+        .forEach((bar) => {
+            daVinciIntervals.push({
+                nodeIndexes: [bar.jointA.index, bar.jointB.index, bar.jointC.index, bar.jointD.index],
+                type: "type 1",
+            })
         })
-    })
-    bolts.forEach((bolt) => {
+    bolts
+        .filter(bolt => bolt.jointA.position === JointPosition.Above || bolt.jointB.position === JointPosition.Above)
+        .forEach((bolt) => {
         daVinciIntervals.push({
             nodeIndexes: [bolt.jointA.index, bolt.jointB.index],
             type: "type 2",
