@@ -20,11 +20,7 @@ export interface Joint {
 
 export interface Bar {
     index: number
-    jointA: Joint
-    jointB: Joint
-    jointC: Joint
-    jointD: Joint
-    planeJoint?: Joint
+    joints: Joint[]
     vertexA: Vertex
     vertexB: Vertex
 }
@@ -72,13 +68,15 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
                 return
             }
             const index = bars.length
-            const jointA = freshJoint(new Vector3().copy(vertex.location).applyAxisAngle(rotationAxis, rotationAngle))
-            const jointB = freshJoint(new Vector3())
-            const jointC = freshJoint(new Vector3())
-            const jointD = freshJoint(new Vector3().copy(adjacentVertex.location).applyAxisAngle(rotationAxis, rotationAngle))
+            const barJoints: Joint[] = [
+                freshJoint(new Vector3().copy(vertex.location).applyAxisAngle(rotationAxis, rotationAngle)),
+                freshJoint(new Vector3()),
+                freshJoint(new Vector3()),
+                freshJoint(new Vector3().copy(adjacentVertex.location).applyAxisAngle(rotationAxis, rotationAngle)),
+            ]
             const vertexA = vertex
             const vertexB = adjacentVertex
-            const bar: Bar = {index, jointA, jointD, jointB, jointC, vertexA, vertexB}
+            const bar: Bar = {index, joints: barJoints, vertexA, vertexB}
             bars.push(bar)
             dictionary[barName(bar.vertexA, bar.vertexB)] = bar
         })
@@ -88,14 +86,14 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
         const hub: Hub = {adjacentBars}
         return hub
     })
-    bars.forEach(({jointA, jointD}) => {
-        const axis = new Vector3().lerpVectors(jointA.point, jointD.point, 0.5).normalize()
-        jointA.point.applyAxisAngle(axis, twist)
-        jointD.point.applyAxisAngle(axis, twist)
+    bars.forEach(({joints}) => {
+        const axis = new Vector3().lerpVectors(joints[0].point, joints[3].point, 0.5).normalize()
+        joints[0].point.applyAxisAngle(axis, twist)
+        joints[3].point.applyAxisAngle(axis, twist)
     })
 
     function intersect(planeBar: Bar, lineBar: Bar, extendBar: boolean): Joint {
-        const normal = new Vector3().crossVectors(planeBar.jointA.point, planeBar.jointD.point).normalize()
+        const normal = new Vector3().crossVectors(planeBar.joints[0].point, planeBar.joints[3].point).normalize()
         const plane = new Plane(normal)
         const hubA = hubs[planeBar.vertexA.index]
         const adjacentIndex = hubA.adjacentBars.findIndex(adj => adj.index === planeBar.index)
@@ -105,29 +103,29 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
         const extend = (start: Vector3, end: Vector3) =>
             new Vector3().copy(end).add(new Vector3().subVectors(end, start))
         const nextLine = new Line3(
-            extend(lineBar.jointA.point, lineBar.jointD.point),
-            extend(lineBar.jointD.point, lineBar.jointA.point),
+            extend(lineBar.joints[0].point, lineBar.joints[3].point),
+            extend(lineBar.joints[3].point, lineBar.joints[0].point),
         )
         const intersectionPoint = new Vector3()
         plane.intersectLine(nextLine, intersectionPoint)
-        const distA = intersectionPoint.distanceTo(lineBar.jointA.point)
-        const distB = intersectionPoint.distanceTo(lineBar.jointD.point)
+        const distA = intersectionPoint.distanceTo(lineBar.joints[0].point)
+        const distB = intersectionPoint.distanceTo(lineBar.joints[3].point)
         const forward = distA < distB
         if (forward) {
             if (extendBar) {
-                lineBar.jointA.point.copy(intersectionPoint)
-                return lineBar.jointA
+                lineBar.joints[0].point.copy(intersectionPoint)
+                return lineBar.joints[0]
             } else {
-                lineBar.jointB.point.copy(intersectionPoint)
-                return lineBar.jointB
+                lineBar.joints[1].point.copy(intersectionPoint)
+                return lineBar.joints[1]
             }
         } else {
             if (extendBar) {
-                lineBar.jointD.point.copy(intersectionPoint)
-                return lineBar.jointD
+                lineBar.joints[3].point.copy(intersectionPoint)
+                return lineBar.joints[3]
             } else {
-                lineBar.jointC.point.copy(intersectionPoint)
-                return lineBar.jointC
+                lineBar.joints[2].point.copy(intersectionPoint)
+                return lineBar.joints[2]
             }
         }
     }
@@ -156,11 +154,11 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
         joint.position = distance <= 0 ? JointPosition.Above : JointPosition.Below
     })
     bars.forEach(bar => {
-        const line = new Line3(bar.jointA.point, bar.jointD.point)
+        const line = new Line3(bar.joints[0].point, bar.joints[3].point)
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
             const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
-            bar.planeJoint = planeJoint
+            bar.joints.push(planeJoint)
             joints.push(planeJoint)
         }
     })
@@ -178,20 +176,20 @@ export function degreesToRadians(degree: number): number {
 export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutput {
     const daVinciIntervals: DaVinciInterval [] = []
     bars
-        .filter(bar => bar.jointA.position === JointPosition.Above || bar.jointD.position === JointPosition.Above)
+        .filter(bar => bar.joints[0].position === JointPosition.Above || bar.joints[3].position === JointPosition.Above)
         .forEach((bar) => {
             daVinciIntervals.push({
-                nodeIndexes: [bar.jointA.index, bar.jointB.index, bar.jointC.index, bar.jointD.index],
+                nodeIndexes: bar.joints.map(j => j.index),
                 type: "type 1",
             })
         })
     bolts
         .filter(bolt => bolt.jointA.position === JointPosition.Above || bolt.jointB.position === JointPosition.Above)
         .forEach((bolt) => {
-        daVinciIntervals.push({
-            nodeIndexes: [bolt.jointA.index, bolt.jointB.index],
-            type: "type 2",
+            daVinciIntervals.push({
+                nodeIndexes: [bolt.jointA.index, bolt.jointB.index],
+                type: "type 2",
+            })
         })
-    })
     return {joints, daVinciIntervals}
 }
