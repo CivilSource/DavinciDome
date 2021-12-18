@@ -26,9 +26,11 @@ const UP = new Vector3(0, 1, 0)
 const DOWN = new Vector3(0, -1, 0)
 
 export function BarBox({bar, renderSpec}: { bar: Bar, renderSpec: DaVinciSpec }): JSX.Element {
-    const length = bar.jointA.point.distanceTo(bar.jointD.point)
-    const unit = new Vector3().subVectors(bar.jointD.point, bar.jointA.point).normalize()
-    const midpoint = new Vector3().lerpVectors(bar.jointA.point, bar.jointD.point, 0.5)
+    const jointA = bar.joints[0]
+    const jointB = bar.joints[bar.joints.length -1]
+    const length = jointA.point.distanceTo(jointB.point)
+    const unit = new Vector3().subVectors(jointB.point, jointA.point).normalize()
+    const midpoint = new Vector3().lerpVectors(jointA.point, jointB.point, 0.5)
     const tangent = new Vector3().crossVectors(midpoint, unit).normalize()
     const basis = new Matrix4()
         .makeBasis(new Vector3().copy(midpoint).normalize(), unit, tangent)
