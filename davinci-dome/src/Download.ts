@@ -22,7 +22,6 @@ function extractNodeFile(output: DaVinciOutput): string {
     const rows: string[][] = []
     rows.push(["index", "x", "y", "z"])
     output.joints
-        .filter(joint => joint.position !== JointPosition.Below)
         .forEach((joint, index) => rows.push([
             (index + 1).toFixed(0),
             csvNumber(joint.point.x), csvNumber(joint.point.z), csvNumber(joint.point.y),

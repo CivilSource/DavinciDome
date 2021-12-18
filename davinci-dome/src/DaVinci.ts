@@ -145,10 +145,9 @@ export function daVinci(scaffold: Scaffold, angle: number, rotate: boolean): DaV
 }
 
 export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaVinciResult {
-    const joints = [...result.joints]
     const bolts = [...result.bolts]
     const plane = new Plane(new Vector3(0, -1, 0), surfaceHeight)
-    joints.forEach(joint => {
+    result.joints.forEach(joint => {
         const distance = plane.distanceToPoint(joint.point)
         joint.position = distance <= 0 ? JointPosition.Above : JointPosition.Below
     })
@@ -156,13 +155,16 @@ export function daVinciToDome(result: DaVinciResult, surfaceHeight: number): DaV
         const line = new Line3(bar.joints[0].point, bar.joints[3].point)
         const point = plane.intersectLine(line, new Vector3())
         if (point) {
-            const planeJoint: Joint = {point, index: joints.length, position: JointPosition.OnSurface}
-            joints.push(planeJoint)
-            return sawBar(bar, planeJoint)
+            const planeJoint: Joint = {point, index: result.joints.length, position: JointPosition.OnSurface}
+            result.joints.push(planeJoint)
+            const withPlaneJoint = (bar.joints[0].position === JointPosition.Below) ? [planeJoint, ...bar.joints] : [...bar.joints, planeJoint]
+            return {...bar, joints: withPlaneJoint.filter(b => b.position !== JointPosition.Below)}
         } else {
             return bar
         }
     })
+    const joints = result.joints.filter(joint => joint.position !== JointPosition.Below)
+    joints.forEach((joint, index) => joint.index = index)
     return {bars, bolts, joints}
 }
 
@@ -193,10 +195,4 @@ export function daVinciOutput({bars, bolts, joints}: DaVinciResult): DaVinciOutp
             })
         })
     return {joints, daVinciIntervals}
-}
-
-function sawBar(bar: Bar, planeJoint: Joint): Bar {
-    const allJoints = (bar.joints[0].position === JointPosition.Below) ? [planeJoint, ...bar.joints] : [...bar.joints, planeJoint]
-    const joints = allJoints.filter(b => b.position !== JointPosition.Below)
-    return {...bar, joints}
 }
