@@ -66,7 +66,9 @@ function App(): JSX.Element {
                     if (!face) {
                         return
                     }
-                    const position = face.normal.multiplyScalar(event.camera.position.length())
+                    const position = new Vector3(0, renderSpec.planeHeight, 0)
+                    const distance = position.distanceTo(event.camera.position)
+                    position.add(face.normal.multiplyScalar(distance))
                     event.camera.position.copy(position)
                 }} position={new Vector3(0, renderSpec.planeHeight, 0)}>
                     <boxGeometry args={[1, 1, 1]}/>
@@ -91,7 +93,7 @@ function App(): JSX.Element {
                 ))}
                 <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
                 <PerspectiveCamera makeDefault={true}
-                                   position={new Vector3(2 * circleRadius(), (renderSpec.planeHeight + renderSpec.radius) / 2, 0)}/>
+                                   position={new Vector3(2 * circleRadius(), renderSpec.planeHeight, 0)}/>
                 <OrbitControls target={new Vector3(0, (renderSpec.planeHeight + renderSpec.radius) / 2, 0)}/>
             </Canvas>
         </div>
