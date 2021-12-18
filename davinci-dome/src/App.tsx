@@ -23,7 +23,7 @@ const INITIAL_RENDER_SPEC: DaVinciSpec = {
     radius: 7,
     boltWidth: 0.05,
     barWidth: 0.3,
-    barHeight: 0.02,
+    barHeight: 0.06,
     barExtension: 0.3,
     boltExtension: 0.2,
     planeHeight: 0,
@@ -49,9 +49,11 @@ function App(): JSX.Element {
         const radians = Math.abs(degreesToRadians(degrees))
         const result = daVinci(new Scaffold(frequency, radius, chiralityFromSpec(renderSpec)), radians, true)
         setDaVinciResult(daVinciToDome(result, renderSpec.planeHeight))
-        console.log("RENDER_SPEC", renderSpec.radius)
         setVersion(v => v + 1)
     }, [renderSpec])
+    const circleRadius = () => 1.5 * Math.sqrt(daVinciResult.joints.filter(j => j.position !== JointPosition.Below).reduce((r, {point}) => (
+        Math.max(r, point.x * point.x + point.z * point.z)
+    ), 0))
     return (
         <div className="App" style={{width: size[0], height: size[1]}}>
             <SpecEditor spec={renderSpec} setSpec={spec => setRenderSpec(spec)}
@@ -66,12 +68,12 @@ function App(): JSX.Element {
                     }
                     const position = face.normal.multiplyScalar(event.camera.position.length())
                     event.camera.position.copy(position)
-                }}>
+                }} position={new Vector3(0, renderSpec.planeHeight, 0)}>
                     <boxGeometry args={[1, 1, 1]}/>
                     <meshStandardMaterial transparent={true} opacity={0.8} color="orange"/>
                 </mesh>
                 <mesh rotation={new Euler(Math.PI / 2, 0, 0)} position={new Vector3(0, renderSpec.planeHeight, 0)}>
-                    <circleGeometry args={[1.5 * renderSpec.radius, 120]}/>
+                    <circleGeometry args={[circleRadius(), 120]}/>
                     <meshStandardMaterial transparent={true} opacity={0.9} color="darkgreen" side={2}/>
                 </mesh>
                 {daVinciResult.bars
@@ -85,11 +87,12 @@ function App(): JSX.Element {
                         <BoltCylinder key={`bolt-${version}-#${index}`} bolt={bolt} renderSpec={renderSpec}/>
                     ))}
                 {daVinciResult.joints.filter(joint => joint.position === JointPosition.OnSurface).map((joint, index) => (
-                    <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={renderSpec.radius / 50}/>
+                    <Ball key={`ball-${version}-#${index}`} position={joint.point} radius={renderSpec.barWidth}/>
                 ))}
                 <pointLight position={[0, 10 * renderSpec.radius, 0]} color="white"/>
-                <PerspectiveCamera makeDefault={true} position={[renderSpec.radius * 3, 0, 0]}/>
-                <OrbitControls/>
+                <PerspectiveCamera makeDefault={true}
+                                   position={new Vector3(2 * circleRadius(), (renderSpec.planeHeight + renderSpec.radius) / 2, 0)}/>
+                <OrbitControls target={new Vector3(0, (renderSpec.planeHeight + renderSpec.radius) / 2, 0)}/>
             </Canvas>
         </div>
     )
